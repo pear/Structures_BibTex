@@ -460,14 +460,8 @@ class Structures_BibTex
      */
     function _unwrap($entry)
     {
-        $replaceall = array("\n\r", "\n", '  ');
-        foreach ($replaceall as $replace) {
-            while (substr_count($entry, $replace)) {
-                $entry = str_replace($replace, '', $entry);
-            }
-        }
-        $entry = trim($entry);
-        return $entry;
+        $entry = preg_replace('/\s+/', ' ', $entry);
+        return trim($entry);
     }
 
     /**
