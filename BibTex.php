@@ -154,7 +154,7 @@ class Structures_BibTex
     function setOption($option, $value)
     {
         $ret = true;
-        if (isset($this->_options[$option])) {
+        if (array_key_exists($option, $this->_options)) {
             $this->_options[$option] = $value;
         } else {
             $ret = PEAR::raiseError('Unknown option '.$option);
@@ -513,7 +513,10 @@ class Structures_BibTex
                         if ($inlast) {
                             $last .= ' '.$tmparray[$j];
                         } elseif ($invon) {
-                            if (0 != ($this->_determineCase($tmparray[$j]))) { //Change from von to last
+                            $case = $this->_determineCase($tmparray[$j]);
+                            if (PEAR::isError($case)) {
+                                // IGNORE?
+                            } elseif (0 == $case) { //Change from von to last
                                 //You only change when there is no more lower case there
                                 $islast = true;
                                 for ($k=($j+1); $k<($size-1); $k++) {
@@ -532,7 +535,10 @@ class Structures_BibTex
                                 $von .= ' '.$tmparray[$j];
                             }
                         } else {
-                            if (0 == ($this->_determineCase($tmparray[$j]))) { //Change from first to von
+                            $case = $this->_determineCase($tmparray[$j]);
+                            if (PEAR::isError($case)) {
+                                // IGNORE?
+                            } elseif (0 == $case) { //Change from first to von
                                 $invon = true;
                                 $von   .= ' '.$tmparray[$j];
                             } else {
@@ -562,7 +568,10 @@ class Structures_BibTex
                                 $islast = true;
                                 for ($k=($j+1); $k<($size-1); $k++) {
                                     $this->_determineCase($vonlastarray[$k]);
-                                    if (0 == ($this->_determineCase($vonlastarray[$k]))) {
+                                    $case = $this->_determineCase($vonlastarray[$k]);
+                                    if (PEAR::isError($case)) {
+                                        // IGNORE?
+                                    } elseif (0 == $case) {
                                         $islast = false;
                                     }
                                 }
