@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL);
+
 require_once 'PEAR.php';
 require_once './Structures_BibTex.php';
 
@@ -30,4 +32,7 @@ print "Converting This Array:\n\n";
 print_r($foo->data);
 print "\nInto this:\n\n";
 print $foo->bibTex();
+print "\nAnd here is the RTF String:\n\n";
+print $foo->rtf();
+print "</pre>";
 ?>
