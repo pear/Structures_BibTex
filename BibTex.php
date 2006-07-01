@@ -111,6 +111,13 @@ class Structures_BibTex
      * @var array
      */
     var $_options;
+    /**
+     * RTF Format String
+     *
+     * @access public
+     * @var string
+     */
+    var $rtfstring;
 
     /**
      * Constructor
@@ -141,6 +148,7 @@ class Structures_BibTex
                 //Currently nothing is done here, but it could for example raise an warning
             }
         }
+        $this->rtfstring = 'AUTHORS, "{\b TITLE}", {\i JOURNAL}, YEAR';
     }
 
     /**
@@ -766,6 +774,18 @@ class Structures_BibTex
                     /*We build the author following the third form.
                      This is easy to build and less error-prone.
                      In the future there sould be an option to change this!*/
+                    if (!array_key_exists('von', $authorentry)) {
+                        $authorentry['von'] = '';
+                    }
+                    if (!array_key_exists('last', $authorentry)) {
+                        $authorentry['last'] = '';
+                    }
+                    if (!array_key_exists('jr', $authorentry)) {
+                        $authorentry['jr'] = '';
+                    }
+                    if (!array_key_exists('first', $authorentry)) {
+                        $authorentry['first'] = '';
+                    }
                     $tmparray[] = trim($authorentry['von'].' '.$authorentry['last'].', '.$authorentry['jr'].', '.$authorentry['first']);
                 }
                 $author = join(' and ', $tmparray);
@@ -809,6 +829,80 @@ class Structures_BibTex
                 $ret[$entry['type']] = 1;
             }
         }
+        return $ret;
+    }
+    
+    /**
+     * Returns the stored data in RTF format
+     *
+     * This method simply returns a RTF formatted string. This is done very
+     * simple and is not intended for heavy using and fine formatting. This
+     * should be done by BibTex! It is intended to give some kind of quick
+     * preview or to send someone a refernce list as word/rtf format (even
+     * some people in the scientific field still use word). If you want to
+     * change the default format you have to override the class variable
+     * "rtfstring". This variable is used and the placeholders simply replaced.
+     *
+     * @return string the RTF Strings
+     */
+    function rtf()
+    {
+    //$this->rtfstring = 'AUTHORS, " {\b TITLE}", {\i JOURNAL}, YEAR';
+        $ret = "{\\rtf\n";
+        foreach ($this->data as $entry) {
+            $line    = $this->rtfstring;
+            $title   = '';
+            $journal = '';
+            $year    = '';
+            $authors = '';
+            if (array_key_exists('title', $entry)) {
+                $title = $this->_unwrap($entry['title']);
+            }
+            if (array_key_exists('journal', $entry)) {
+                $journal = $this->_unwrap($entry['journal']);
+            }
+            if (array_key_exists('year', $entry)) {
+                $year = $this->_unwrap($entry['year']);
+            }
+            if (array_key_exists('author', $entry)) {
+                $tmparray = array(); //In this array the authors are saved and the joind with an and
+                foreach ($entry['author'] as $authorentry) {
+                    $first = '';
+                    $von   = '';
+                    $last  = '';
+                    $jr    = '';
+                    if (array_key_exists('von', $authorentry)) {
+                        if (''!=$authorentry['von']) {
+                            $von = ' '.trim($authorentry['von']);
+                        }
+                    }
+                    if (array_key_exists('last', $authorentry)) {
+                        if (''!=$authorentry['last']) {
+                            $last = ' '.trim($authorentry['last']);
+                        }
+                    }
+                    if (array_key_exists('jr', $authorentry)) {
+                        if (''!=$authorentry['jr']) {
+                            $jr = ' '.trim($authorentry['jr']);
+                        }
+                    }
+                    if (array_key_exists('first', $authorentry)) {
+                        if (''!=$authorentry['first']) {
+                            $first = trim($authorentry['first']);
+                        }
+                    }
+                    $tmparray[] = trim($first.$von.$last.$jr);
+                }
+                $authors = join(', ', $tmparray);
+            }
+            $line = str_replace("TITLE", $title, $line);
+            $line = str_replace("JOURNAL", $journal, $line);
+            $line = str_replace("YEAR", $year, $line);
+            $line = str_replace("AUTHORS", $authors, $line);
+            $line .= "\n\\par\n";
+            $ret  .= $line;
+        }
+        $ret .= '}';
         return $ret;
     }
 }
