@@ -1,27 +1,27 @@
 <?php
-/* vim: set ts=4 sw=4: */
-/**
- * Class for working with BibTex data
- *
- * A class which provides common methods to access and
- * create Strings in BibTex format
- *
- * PHP versions 4 and 5
- *
- * LICENSE: This source file is subject to version 3.0 of the PHP license
- * that is available through the world-wide-web at the following URI:
- * http://www.php.net/license/3_0.txt.  If you did not receive a copy of
- * the PHP License and are unable to obtain it through the web, please
- * send a note to license@php.net so we can mail you a copy immediately.
- *
- * @category   Structures
- * @package    Structures_BibTex
- * @author     Elmar Pitschke <elmar.pitschke@gmx.de>
- * @copyright  1997-2005 The PHP Group
- * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
- * @version    CVS: $Id$
- * @link       http://pear.php.net/File/BibTex
- */
+  /* vim: set ts=4 sw=4: */
+  /**
+   * Class for working with BibTex data
+   *
+   * A class which provides common methods to access and
+   * create Strings in BibTex format
+   *
+   * PHP versions 4 and 5
+   *
+   * LICENSE: This source file is subject to version 3.0 of the PHP license
+   * that is available through the world-wide-web at the following URI:
+   * http://www.php.net/license/3_0.txt.  If you did not receive a copy of
+   * the PHP License and are unable to obtain it through the web, please
+   * send a note to license@php.net so we can mail you a copy immediately.
+   *
+   * @category   Structures
+   * @package    Structures_BibTex
+   * @author     Elmar Pitschke <elmar.pitschke@gmx.de>
+   * @copyright  1997-2005 The PHP Group
+   * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
+   * @version    CVS: $Id$
+   * @link       http://pear.php.net/File/BibTex
+   */
 
 require_once 'PEAR.php' ;
 /**
@@ -128,7 +128,7 @@ class Structures_BibTex
     function Structures_BibTex($options = array())
     {
         $this->_delimiters     = array('"'=>'"',
-                                      '{'=>'}');
+                                        '{'=>'}');
         $this->data            = array();
         $this->content         = '';
         //$this->_stripDelimiter = $stripDel;
@@ -212,7 +212,6 @@ class Structures_BibTex
         $buffer         = '';
         for ($i = 0; $i < strlen($this->content); $i++) {
             $char = substr($this->content, $i, 1);
-            //$char = $this->content{$i};
             if ((0 == $open) && ('@' == $char)) { //The beginning of an entry
                 $entry = true;
             } elseif ($entry && ('{' == $char) && ('\\' != $lastchar)) { //Inside an entry and non quoted brace is opening
@@ -315,7 +314,7 @@ class Structures_BibTex
                 $position = strrpos($entry, '=');
                 //Checking that the equal sign is not quoted or is not inside a equation (For example in an abstract)
                 $proceed  = true;
-                if ($entry{$position-1} == '\\') {
+                if (substr($entry, $position-1, 1) == '\\') {
                     $proceed = false;
                 }
                 if ($proceed) {
@@ -325,7 +324,7 @@ class Structures_BibTex
                     $substring = substr($entry, 0, $position);
                     $position  = strrpos($substring,'=');
                     $proceed   = true;
-                    if ($entry{$position-1} == '\\') {
+                    if (subtr($entry, $position-1, 1) == '\\') {
                         $proceed = false;
                     }
                     if ($proceed) {
@@ -336,7 +335,7 @@ class Structures_BibTex
                 $value = trim(substr($entry, $position+1));
                 $entry = substr($entry, 0, $position);
 
-                if (',' == $value{strlen($value)-1}) {
+                if (',' == substr($value, strlen($value)-1, 1)) {
                     $value = substr($value, 0, -1);
                 }
                 if ($this->_options['validate']) {
@@ -360,7 +359,6 @@ class Structures_BibTex
             if ('@' == $ret['type']{0}) {
                 $ret['type'] = substr($ret['type'], 1);
             }
-
             //Handling the authors
             if (in_array('author', array_keys($ret))) {
                 $ret['author'] = $this->_extractAuthors($ret['author']);
@@ -390,8 +388,8 @@ class Structures_BibTex
         $length = strlen($entry);
         $open   = 0;
         for ($i = $length-1; $i >= $position; $i--) {
-            $precedingchar = $entry{$i-1};
-            $char          = $entry{$i};
+            $precedingchar = substr($entry, $i-1, 1);
+            $char          = substr($entry, $i, 1);
             if (('{' == $char) && ('\\' != $precedingchar)) {
                 $open++;
             }
@@ -417,8 +415,6 @@ class Structures_BibTex
                 $ret = false;
                 $found = 0;
                 for ($i = $length; $i >= $position; $i--) {
-                    //$precedingchar = $entry{$i-1};
-                    //$char          = $entry{$i};
                     $precedingchar = substr($entry, $i-1, 1);
                     $char          = substr($entry, $i, 1);
                     if (('"' == $char) && ('\\' != $precedingchar)) {
@@ -524,18 +520,24 @@ class Structures_BibTex
                             $case = $this->_determineCase($tmparray[$j]);
                             if (PEAR::isError($case)) {
                                 // IGNORE?
-                            } elseif (0 == $case) { //Change from von to last
+                            } elseif ((0 == $case) || (-1 == $case)) { //Change from von to last
                                 //You only change when there is no more lower case there
                                 $islast = true;
                                 for ($k=($j+1); $k<($size-1); $k++) {
-                                    $this->_determineCase($tmparray[$k]);
-                                    if (0 == ($this->_determineCase($tmparray[$k]))) {
+                                    $futurecase = $this->_determineCase($tmparray[$k]);
+                                    if (PEAR::isError($case)) {
+                                        // IGNORE?
+                                    } elseif (0 == $futurecase) {
                                         $islast = false;
                                     }
                                 }
                                 if ($islast) {
                                     $inlast = true;
-                                    $last   .= ' '.$tmparray[$j];
+                                    if (-1 == $case) { //Caseless belongs to the last
+                                        $last .= ' '.$tmparray[$j];
+                                    } else {
+                                        $von  .= ' '.$tmparray[$j];
+                                    }
                                 } else {
                                     $von    .= ' '.$tmparray[$j];
                                 }
@@ -682,7 +684,7 @@ class Structures_BibTex
         $lastchar = '';
         $char     = '';
         for ($i = 0; $i < strlen($entry); $i++) {
-            $char = $entry{$i};
+            $char = substr($entry, $i, 1);
             if (('{' == $char) && ('\\' != $lastchar)) {
                 $open++;
             }
@@ -718,8 +720,8 @@ class Structures_BibTex
      * @access public
      */
     function clearWarnings() {
-            $this->warnings = array();
-        }
+        $this->warnings = array();
+    }
 
     /**
      * Is there a warning?
@@ -847,7 +849,7 @@ class Structures_BibTex
      */
     function rtf()
     {
-    //$this->rtfstring = 'AUTHORS, " {\b TITLE}", {\i JOURNAL}, YEAR';
+        //$this->rtfstring = 'AUTHORS, " {\b TITLE}", {\i JOURNAL}, YEAR';
         $ret = "{\\rtf\n";
         foreach ($this->data as $entry) {
             $line    = $this->rtfstring;

@@ -1,8 +1,8 @@
 <?php
-// Call Structures_BibTexTest::main() if this source file is executed directly.
+  // Call Structures_BibTexTest::main() if this source file is executed directly.
 if (!defined("PHPUnit2_MAIN_METHOD")) {
     define("PHPUnit2_MAIN_METHOD", "BibTexTest::main");
-}
+ }
 
 require_once "PHPUnit2/Framework/TestCase.php";
 require_once "PHPUnit2/Framework/TestSuite.php";
@@ -216,10 +216,7 @@ author = {John Doe and Jane Doe}
         $testarray[0]['author'][1]['von']   = '';
         $testarray[0]['author'][1]['last']  = 'Doe';
         $testarray[0]['author'][1]['jr']    = '';
-        $shouldbe = "@article { art1,
-    title = {Titel1},
-    author = {Doe, , John and Doe, , Jane}
-}";
+        $shouldbe = "@article { art1,\n\ttitle = {Titel1},\n\tauthor = {Doe, , John and Doe, , Jane}\n}";
         $this->obj->data = $testarray;
         $this->assertEquals(trim($shouldbe),trim($this->obj->bibTex()));
     }
@@ -317,23 +314,23 @@ author = {John Doe and Jane Doe}
         $this->assertTrue($this->obj->data == $shouldbe);
     }
     /*
-    function testWrongBraces1() {
-        $teststring = "@Article { art1,
-title = {Tit}el1},
-author = {John Doe and Jane Doe}
-}";
-        $this->obj->content = $teststring;
-        $this->assertTrue(PEAR::isError($this->obj->parse()));
-    }
+	 function testWrongBraces1() {
+	 $teststring = "@Article { art1,
+	 title = {Tit}el1},
+	 author = {John Doe and Jane Doe}
+	 }";
+	 $this->obj->content = $teststring;
+	 $this->assertTrue(PEAR::isError($this->obj->parse()));
+	 }
 
-    function testWrongBraces2() {
-        $teststring = "@Article { art1,
-title = {Titel1},
-author = {John Doe and }Jane }Doe}
-}";
-        $this->obj->content = $teststring;
-        $this->assertTrue(PEAR::isError($this->obj->parse()));
-    }
+	 function testWrongBraces2() {
+	 $teststring = "@Article { art1,
+	 title = {Titel1},
+	 author = {John Doe and }Jane }Doe}
+	 }";
+	 $this->obj->content = $teststring;
+	 $this->assertTrue(PEAR::isError($this->obj->parse()));
+	 }
     */
     function testWrongBraces3() {
         $teststring = "@Article { art1,
@@ -363,15 +360,15 @@ author = \"John Doe and \\\"Jane Doe\"
         $this->assertTrue('WARNING_ESCAPED_DOUBLE_QUOTE_INSIDE_DOUBLE_QUOTES'==$this->obj->warnings[0]['warning']);
     }
     /*
-    function testWarningAmountBraces() {
-        $teststring = "@Article { art1,
-title = {Tit{el1},
-author = {John Doe and }Jane Doe}
-}";
-        $this->obj->content = $teststring;
-        $this->obj->parse();
-        $this->assertTrue('WARNING_UNBALANCED_AMOUNT_OF_BRACES'==$this->obj->warnings[0]['warning']);
-    }
+	 function testWarningAmountBraces() {
+	 $teststring = "@Article { art1,
+	 title = {Tit{el1},
+	 author = {John Doe and }Jane Doe}
+	 }";
+	 $this->obj->content = $teststring;
+	 $this->obj->parse();
+	 $this->assertTrue('WARNING_UNBALANCED_AMOUNT_OF_BRACES'==$this->obj->warnings[0]['warning']);
+	 }
     */
     function testWarningMultipleEntries() {
         $teststring = "@Article { art1,
@@ -407,280 +404,284 @@ author = {John Doe and Jane Doe}
      "First": There are three different ways writing an author this is the first one
      "Simple": Description of the tes
     */
-  function testAuthorFirstSimple() {
-      $test     = "AA BB";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA';
-      $shouldbe[0]['von']   = '';
-      $shouldbe[0]['last']  = 'BB';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    function testAuthorFirstSimple() {
+        $test     = "AA BB";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA';
+        $shouldbe[0]['von']   = '';
+        $shouldbe[0]['last']  = 'BB';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-  function testAuthorFirstLastCannotBeEmpty() {
-      $test     = "AA";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = '';
-      $shouldbe[0]['von']   = '';
-      $shouldbe[0]['last']  = 'AA';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorFirstSimpleLowerCase() {
-      $test     = "AA bb";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA';
-      $shouldbe[0]['von']   = '';
-      $shouldbe[0]['last']  = 'bb';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorFirstLastCannotBeEmptyLowerCase() {
-      $test     = "aa";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = '';
-      $shouldbe[0]['von']   = '';
-      $shouldbe[0]['last']  = 'aa';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorFirstSimpleVon() {
-      $test     = "AA bb CC";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA';
-      $shouldbe[0]['von']   = 'bb';
-      $shouldbe[0]['last']  = 'CC';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorFirstSimpleVonInnerUppercase() {
-      $test     = "AA bb CC dd EE";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA';
-      $shouldbe[0]['von']   = 'bb CC dd';
-      $shouldbe[0]['last']  = 'EE';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorFirstDigitsArecaselessUppercase() {
-      $test     = "AA 1B cc dd";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA 1B';
-      $shouldbe[0]['von']   = 'cc';
-      $shouldbe[0]['last']  = 'dd';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorFirstDigitsArecaselessLowercase() {
-      $test     = "AA 1b cc dd";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA';
-      $shouldbe[0]['von']   = '1b cc';
-      $shouldbe[0]['last']  = 'dd';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorFirstPseudoLettersAreCaselessLowerInsideUpperOutside() {
-      $test     = "AA {b}B cc dd";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA {b}B';
-      $shouldbe[0]['von']   = 'cc';
-      $shouldbe[0]['last']  = 'dd';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorFirstPseudoLettersAreCaselessLowerInsideLowerOutside() {
-      $test     = "AA {b}b cc dd";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA';
-      $shouldbe[0]['von']   = '{b}b cc';
-      $shouldbe[0]['last']  = 'dd';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorFirstPseudoLettersAreCaselessUpperInsideUpperOutside() {
-      $test     = "AA {B}B cc dd";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA {B}B';
-      $shouldbe[0]['von']   = 'cc';
-      $shouldbe[0]['last']  = 'dd';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorFirstPseudoLettersAreCaselessUpperInsideLowerOutside() {
-      $test     = "AA {B}b cc dd";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA';
-      $shouldbe[0]['von']   = '{B}b cc';
-      $shouldbe[0]['last']  = 'dd';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorFirstNonLettersAreCaselessUpperCase() {
-      $test     = "AA \BB{b} cc dd";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA \BB{b}';
-      $shouldbe[0]['von']   = 'cc';
-      $shouldbe[0]['last']  = 'dd';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorFirstNonLettersAreCaselessLowerCase() {
-      $test     = "AA \bb{b} cc dd";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA';
-      $shouldbe[0]['von']   = '\bb{b} cc';
-      $shouldbe[0]['last']  = 'dd';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorFirstGroupingCaselessOne() {
-      $test     = "AA {bb} cc DD";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA {bb}';
-      $shouldbe[0]['von']   = 'cc';
-      $shouldbe[0]['last']  = 'DD';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorFirstGroupingCaselessTwo() {
-      $test     = "AA bb {cc} DD";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA';
-      $shouldbe[0]['von']   = 'bb';
-      $shouldbe[0]['last']  = '{cc} DD';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorFirstGroupingCaselessThree() {
-      $test     = "AA {bb} CC";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA {bb}';
-      $shouldbe[0]['von']   = '';
-      $shouldbe[0]['last']  = 'CC';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorSecondAndThirdSimpleCaseFirstUppercase() {
-      $test     = "bb CC, AA";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA';
-      $shouldbe[0]['von']   = 'bb';
-      $shouldbe[0]['last']  = 'CC';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorSecondAndThirdSimpleCaseFirstLowercase() {
-      $test     = "bb CC, aa";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'aa';
-      $shouldbe[0]['von']   = 'bb';
-      $shouldbe[0]['last']  = 'CC';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorSecondAndThirdSimpleVon() {
-      $test     = "bb CC dd EE, AA";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA';
-      $shouldbe[0]['von']   = 'bb CC dd';
-      $shouldbe[0]['last']  = 'EE';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorSecondAndThirdLastPartCoannotBeEmpty() {
-      $test     = "bb, AA";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA';
-      $shouldbe[0]['von']   = '';
-      $shouldbe[0]['last']  = 'bb';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorSecondAndThirdFirstCanBeEmptyAfterComma() {
-      $test     = "BB,";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = '';
-      $shouldbe[0]['von']   = '';
-      $shouldbe[0]['last']  = 'BB';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorSecondAndThirdSimpleJrUppercase() {
-      $test     = "bb CC,XX, AA";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA';
-      $shouldbe[0]['von']   = 'bb';
-      $shouldbe[0]['last']  = 'CC';
-      $shouldbe[0]['jr']    = 'XX';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorSecondAndThirdSimpleJrLowercase() {
-      $test     = "bb CC,xx, AA";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA';
-      $shouldbe[0]['von']   = 'bb';
-      $shouldbe[0]['last']  = 'CC';
-      $shouldbe[0]['jr']    = 'xx';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  function testAuthorSecondAndThirdJrCanBeEmptyBetweenCommas() {
-      $test     = "BB,, AA";
-      $shouldbe = array();
-      $shouldbe[0]['first'] = 'AA';
-      $shouldbe[0]['von']   = '';
-      $shouldbe[0]['last']  = 'BB';
-      $shouldbe[0]['jr']    = '';
-      $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
-  }
-  /*Testing the case determination needed for the authors*/
-  function testCaseUpperSimple() {
-      $test = 'AA';
-      $this->assertEquals(1, $this->obj->_determineCase($test));
-  }
-  function testCaseLowerSimple() {
-      $test = 'aa';
-      $this->assertEquals(0, $this->obj->_determineCase($test));
-  }
-  function testCaseCaselessSimple() {
-      $test = '{a}';
-      $this->assertEquals(-1, $this->obj->_determineCase($test));
-  }
-  function testCaseUpperComplexBrace() {
-      $test = '{A}A';
-      $this->assertEquals(1, $this->obj->_determineCase($test));
-  }
-  function testCaseLowerComplexBrace() {
-      $test = '{a}a';
-      $this->assertEquals(0, $this->obj->_determineCase($test));
-  }
-  function testCaseUpperComplexNumber() {
-      $test = '1A';
-      $this->assertEquals(1, $this->obj->_determineCase($test));
-  }
-  function testCaseLowerComplexNumber() {
-      $test = '1a';
-      $this->assertEquals(0, $this->obj->_determineCase($test));
-  }
-  function testCaseUpperComplexWhitespace() {
-      $test = ' A';
-      $this->assertEquals(1, $this->obj->_determineCase($test));
-  }
-  function testCaseLowerComplexWhitespace() {
-      $test = ' a';
-      $this->assertEquals(0, $this->obj->_determineCase($test));
-  }
-  function testCaseErrorEmptyString() {
-      $test = '';
-      $this->assertTrue(PEAR::isError($this->obj->_determineCase($test)));
-  }
-  function testCaseErrorNonString() {
-      $test = 2;
-      $this->assertTrue(PEAR::isError($this->obj->_determineCase($test)));
-  }
+    
+    function testAuthorFirstLastCannotBeEmpty() {
+        $test     = "AA";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = '';
+        $shouldbe[0]['von']   = '';
+        $shouldbe[0]['last']  = 'AA';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    
+    function testAuthorFirstSimpleLowerCase() {
+        $test     = "AA bb";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA';
+        $shouldbe[0]['von']   = '';
+        $shouldbe[0]['last']  = 'bb';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    
+    function testAuthorFirstLastCannotBeEmptyLowerCase() {
+        $test     = "aa";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = '';
+        $shouldbe[0]['von']   = '';
+        $shouldbe[0]['last']  = 'aa';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    
+    function testAuthorFirstSimpleVon() {
+        $test     = "AA bb CC";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA';
+        $shouldbe[0]['von']   = 'bb';
+        $shouldbe[0]['last']  = 'CC';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    function testAuthorFirstSimpleVonInnerUppercase() {
+        $test     = "AA bb CC dd EE";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA';
+        $shouldbe[0]['von']   = 'bb CC dd';
+        $shouldbe[0]['last']  = 'EE';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    function testAuthorFirstDigitsArecaselessUppercase() {
+        $test     = "AA 1B cc dd";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA 1B';
+        $shouldbe[0]['von']   = 'cc';
+        $shouldbe[0]['last']  = 'dd';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    function testAuthorFirstDigitsArecaselessLowercase() {
+        $test     = "AA 1b cc dd";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA';
+        $shouldbe[0]['von']   = '1b cc';
+        $shouldbe[0]['last']  = 'dd';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    function testAuthorFirstPseudoLettersAreCaselessLowerInsideUpperOutside() {
+        $test     = "AA {b}B cc dd";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA {b}B';
+        $shouldbe[0]['von']   = 'cc';
+        $shouldbe[0]['last']  = 'dd';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    function testAuthorFirstPseudoLettersAreCaselessLowerInsideLowerOutside() {
+        $test     = "AA {b}b cc dd";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA';
+        $shouldbe[0]['von']   = '{b}b cc';
+        $shouldbe[0]['last']  = 'dd';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    function testAuthorFirstPseudoLettersAreCaselessUpperInsideUpperOutside() {
+        $test     = "AA {B}B cc dd";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA {B}B';
+        $shouldbe[0]['von']   = 'cc';
+        $shouldbe[0]['last']  = 'dd';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    function testAuthorFirstPseudoLettersAreCaselessUpperInsideLowerOutside() {
+        $test     = "AA {B}b cc dd";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA';
+        $shouldbe[0]['von']   = '{B}b cc';
+        $shouldbe[0]['last']  = 'dd';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    function testAuthorFirstNonLettersAreCaselessUpperCase() {
+        $test     = "AA \BB{b} cc dd";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA \BB{b}';
+        $shouldbe[0]['von']   = 'cc';
+        $shouldbe[0]['last']  = 'dd';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    function testAuthorFirstNonLettersAreCaselessLowerCase() {
+        $test     = "AA \bb{b} cc dd";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA';
+        $shouldbe[0]['von']   = '\bb{b} cc';
+        $shouldbe[0]['last']  = 'dd';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    function testAuthorFirstGroupingCaselessOne() {
+        $test     = "AA {bb} cc DD";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA {bb}';
+        $shouldbe[0]['von']   = 'cc';
+        $shouldbe[0]['last']  = 'DD';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    function testAuthorFirstGroupingCaselessTwo() {
+        $test     = "AA bb {cc} DD";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA';
+        $shouldbe[0]['von']   = 'bb';
+        $shouldbe[0]['last']  = '{cc} DD';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    function testAuthorFirstGroupingCaselessThree() {
+        $test     = "AA {bb} CC";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA {bb}';
+        $shouldbe[0]['von']   = '';
+        $shouldbe[0]['last']  = 'CC';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    function testAuthorSecondAndThirdSimpleCaseFirstUppercase() {
+        $test     = "bb CC, AA";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA';
+        $shouldbe[0]['von']   = 'bb';
+        $shouldbe[0]['last']  = 'CC';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    function testAuthorSecondAndThirdSimpleCaseFirstLowercase() {
+        $test     = "bb CC, aa";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'aa';
+        $shouldbe[0]['von']   = 'bb';
+        $shouldbe[0]['last']  = 'CC';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    function testAuthorSecondAndThirdSimpleVon() {
+        $test     = "bb CC dd EE, AA";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA';
+        $shouldbe[0]['von']   = 'bb CC dd';
+        $shouldbe[0]['last']  = 'EE';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    function testAuthorSecondAndThirdLastPartCoannotBeEmpty() {
+        $test     = "bb, AA";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA';
+        $shouldbe[0]['von']   = '';
+        $shouldbe[0]['last']  = 'bb';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    function testAuthorSecondAndThirdFirstCanBeEmptyAfterComma() {
+        $test     = "BB,";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = '';
+        $shouldbe[0]['von']   = '';
+        $shouldbe[0]['last']  = 'BB';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    function testAuthorSecondAndThirdSimpleJrUppercase() {
+        $test     = "bb CC,XX, AA";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA';
+        $shouldbe[0]['von']   = 'bb';
+        $shouldbe[0]['last']  = 'CC';
+        $shouldbe[0]['jr']    = 'XX';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    function testAuthorSecondAndThirdSimpleJrLowercase() {
+        $test     = "bb CC,xx, AA";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA';
+        $shouldbe[0]['von']   = 'bb';
+        $shouldbe[0]['last']  = 'CC';
+        $shouldbe[0]['jr']    = 'xx';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    function testAuthorSecondAndThirdJrCanBeEmptyBetweenCommas() {
+        $test     = "BB,, AA";
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'AA';
+        $shouldbe[0]['von']   = '';
+        $shouldbe[0]['last']  = 'BB';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+    /*Testing the case determination needed for the authors*/
+    function testCaseUpperSimple() {
+        $test = 'AA';
+        $this->assertEquals(1, $this->obj->_determineCase($test));
+    }
+    function testCaseLowerSimple() {
+        $test = 'aa';
+        $this->assertEquals(0, $this->obj->_determineCase($test));
+    }
+    function testCaseCaselessSimple() {
+        $test = '{a}';
+        $this->assertEquals(-1, $this->obj->_determineCase($test));
+    }
+    function testCaseUpperComplexBrace() {
+        $test = '{A}A';
+        $this->assertEquals(1, $this->obj->_determineCase($test));
+    }
+    function testCaseLowerComplexBrace() {
+        $test = '{a}a';
+        $this->assertEquals(0, $this->obj->_determineCase($test));
+    }
+    function testCaseUpperComplexNumber() {
+        $test = '1A';
+        $this->assertEquals(1, $this->obj->_determineCase($test));
+    }
+    function testCaseLowerComplexNumber() {
+        $test = '1a';
+        $this->assertEquals(0, $this->obj->_determineCase($test));
+    }
+    function testCaseUpperComplexWhitespace() {
+        $test = ' A';
+        $this->assertEquals(1, $this->obj->_determineCase($test));
+    }
+    function testCaseLowerComplexWhitespace() {
+        $test = ' a';
+        $this->assertEquals(0, $this->obj->_determineCase($test));
+    }
+    function testCaseErrorEmptyString() {
+        $test = '';
+        $this->assertTrue(PEAR::isError($this->obj->_determineCase($test)));
+    }
+    function testCaseErrorNonString() {
+        $test = 2;
+        $this->assertTrue(PEAR::isError($this->obj->_determineCase($test)));
+    }
 }
 
 // Call Structures_BibTexTest::main() if this source file is executed directly.
 if (PHPUnit2_MAIN_METHOD == "BibTexTest::main") {
     BibTexTest::main();
-}
+ }
 ?>
