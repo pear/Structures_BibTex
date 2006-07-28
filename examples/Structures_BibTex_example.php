@@ -2,7 +2,8 @@
 error_reporting(E_ALL);
 
 require_once 'PEAR.php';
-require_once './Structures_BibTex.php';
+//require_once './Structures_BibTex.php';
+require_once 'Structures/BibTex.php';
 
 $bibtex = new Structures_BibTex();
 
