@@ -31,39 +31,37 @@ require_once 'PEAR.php' ;
  * create Strings in BibTex format.
  * Example 1: Parsing a BibTex File and returning the number of entries
  * <code>
- * $foo = new Structures_BibTex();
- * $ret=$foo->loadFile('foo.bib');
+ * $bibtex = new Structures_BibTex();
+ * $ret    = $bibtex->loadFile('foo.bib');
  * if (PEAR::isError($ret)) {
- *   print $ret->getMessage();
- *   die();
+ *   die($ret->getMessage());
  * }
- * $foo->parse();
- * print "There are ".$foo->amount()." entries";
+ * $bibtex->parse();
+ * print "There are ".$bibtex->amount()." entries";
  * </code>
  * Example 2: Parsing a BibTex File and getting all Titles
  * <code>
- * $foo = new Structures_BibTex();
- * $ret=$foo->loadFile('foo.bib');
+ * $bibtex = new Structures_BibTex();
+ * $ret    = $bibtex->loadFile('bibtex.bib');
  * if (PEAR::isError($ret)) {
- *   print $ret->getMessage();
- *   die();
+ *   die($ret->getMessage());
  * }
- * $foo->parse();
- * foreach ($foo->data as $entry) {
+ * $bibtex->parse();
+ * foreach ($bibtex->data as $entry) {
  *  print $entry['title']."<br />";
  * }
  * </code>
  * Example 3: Adding an entry and printing it in BibTex Format
  * <code>
- * $foo = new Structures_BibTex();
- * $addarray = array();
- * $addarray['type'] = 'Article';
- * $addarray['cite'] = 'art2';
- * $addarray['title'] = 'Titel2';
+ * $bibtex                = new Structures_BibTex();
+ * $addarray              = array();
+ * $addarray['type']      = 'Article';
+ * $addarray['cite']      = 'art2';
+ * $addarray['title']     = 'Titel2';
  * $addarray['author'][0] = 'John Doe';
  * $addarray['author'][1] = 'Jane Doe';
- * $foo->addEntry($addarray);
- * print nl2br($foo->bibTex());
+ * $bibtex->addEntry($addarray);
+ * print nl2br($bibtex->bibTex());
  * </code>
  *
  * @category   Structures
@@ -118,6 +116,13 @@ class Structures_BibTex
      * @var string
      */
     var $rtfstring;
+    /**
+     * HTML Format String
+     *
+     * @access public
+     * @var string
+     */
+    var $htmlstring;
 
     /**
      * Constructor
@@ -148,7 +153,8 @@ class Structures_BibTex
                 //Currently nothing is done here, but it could for example raise an warning
             }
         }
-        $this->rtfstring = 'AUTHORS, "{\b TITLE}", {\i JOURNAL}, YEAR';
+        $this->rtfstring  = 'AUTHORS, "{\b TITLE}", {\i JOURNAL}, YEAR';
+        $this->htmlstring = 'AUTHORS, "<strong>TITLE</strong>", <em>JOURNAL</em>, YEAR<br />';
     }
 
     /**
@@ -840,10 +846,11 @@ class Structures_BibTex
      * This method simply returns a RTF formatted string. This is done very
      * simple and is not intended for heavy using and fine formatting. This
      * should be done by BibTex! It is intended to give some kind of quick
-     * preview or to send someone a refernce list as word/rtf format (even
+     * preview or to send someone a reference list as word/rtf format (even
      * some people in the scientific field still use word). If you want to
      * change the default format you have to override the class variable
      * "rtfstring". This variable is used and the placeholders simply replaced.
+     * Lines with no data cause an warning!
      *
      * @return string the RTF Strings
      */
@@ -897,14 +904,95 @@ class Structures_BibTex
                 }
                 $authors = join(', ', $tmparray);
             }
-            $line = str_replace("TITLE", $title, $line);
-            $line = str_replace("JOURNAL", $journal, $line);
-            $line = str_replace("YEAR", $year, $line);
-            $line = str_replace("AUTHORS", $authors, $line);
-            $line .= "\n\\par\n";
-            $ret  .= $line;
+            if ((''!=$title) || (''!=$journal) || (''!=$year) || (''!=$authors)) {
+                $line = str_replace("TITLE", $title, $line);
+                $line = str_replace("JOURNAL", $journal, $line);
+                $line = str_replace("YEAR", $year, $line);
+                $line = str_replace("AUTHORS", $authors, $line);
+                $line .= "\n\\par\n";
+                $ret  .= $line;
+            } else {
+                $this->_generateWarning('WARNING_LINE_WAS_NOT_CONVERTED', '', print_r($entry,1));
+            }
         }
         $ret .= '}';
+        return $ret;
+    }
+
+    /**
+     * Returns the stored data in HTML format
+     *
+     * This method simply returns a HTML formatted string. This is done very
+     * simple and is not intended for heavy using and fine formatting. This
+     * should be done by BibTex! It is intended to give some kind of quick
+     * preview. If you want to change the default format you have to override
+     * the class variable "htmlstring". This variable is used and the placeholders
+     * simply replaced.
+     * Lines with no data cause an warning!
+     *
+     * @return string the HTML Strings
+     */
+    function html()
+    {
+        $ret = "<p>\n";
+        foreach ($this->data as $entry) {
+            $line    = $this->htmlstring;
+            $title   = '';
+            $journal = '';
+            $year    = '';
+            $authors = '';
+            if (array_key_exists('title', $entry)) {
+                $title = $this->_unwrap($entry['title']);
+            }
+            if (array_key_exists('journal', $entry)) {
+                $journal = $this->_unwrap($entry['journal']);
+            }
+            if (array_key_exists('year', $entry)) {
+                $year = $this->_unwrap($entry['year']);
+            }
+            if (array_key_exists('author', $entry)) {
+                $tmparray = array(); //In this array the authors are saved and the joind with an and
+                foreach ($entry['author'] as $authorentry) {
+                    $first = '';
+                    $von   = '';
+                    $last  = '';
+                    $jr    = '';
+                    if (array_key_exists('von', $authorentry)) {
+                        if (''!=$authorentry['von']) {
+                            $von = ' '.trim($authorentry['von']);
+                        }
+                    }
+                    if (array_key_exists('last', $authorentry)) {
+                        if (''!=$authorentry['last']) {
+                            $last = ' '.trim($authorentry['last']);
+                        }
+                    }
+                    if (array_key_exists('jr', $authorentry)) {
+                        if (''!=$authorentry['jr']) {
+                            $jr = ' '.trim($authorentry['jr']);
+                        }
+                    }
+                    if (array_key_exists('first', $authorentry)) {
+                        if (''!=$authorentry['first']) {
+                            $first = trim($authorentry['first']);
+                        }
+                    }
+                    $tmparray[] = trim($first.$von.$last.$jr);
+                }
+                $authors = join(', ', $tmparray);
+            }
+            if ((''!=$title) || (''!=$journal) || (''!=$year) || (''!=$authors)) {
+                $line = str_replace("TITLE", $title, $line);
+                $line = str_replace("JOURNAL", $journal, $line);
+                $line = str_replace("YEAR", $year, $line);
+                $line = str_replace("AUTHORS", $authors, $line);
+                $line .= "\n";
+                $ret  .= $line;
+            } else {
+                $this->_generateWarning('WARNING_LINE_WAS_NOT_CONVERTED', '', print_r($entry,1));
+            }
+        }
+        $ret .= "</p>\n";
         return $ret;
     }
 }

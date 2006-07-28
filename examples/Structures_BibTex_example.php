@@ -4,15 +4,15 @@ error_reporting(E_ALL);
 require_once 'PEAR.php';
 require_once './Structures_BibTex.php';
 
-$foo = new Structures_BibTex();
+$bibtex = new Structures_BibTex();
 
 //Loading and parsing the file example.bib
-$ret=$foo->loadFile('example.bib');
+$ret=$bibtex->loadFile('example.bib');
 if(PEAR::isError($ret)) {
     print $ret->getMessage();
     die();
 }
-$foo->parse();
+$bibtex->parse();
 
 //Creating an entry
 $addarray = array();
@@ -24,15 +24,17 @@ $addarray['author'][0]['last']  = 'Doe';
 $addarray['author'][1]['first'] = 'Jane';
 $addarray['author'][1]['last']  = 'Doe';
 //Adding the entry
-$foo->addEntry($addarray);
+$bibtex->addEntry($addarray);
 
 //Printing the result
-print "<pre>";
-print "Converting This Array:\n\n";
-print_r($foo->data);
-print "\nInto this:\n\n";
-print $foo->bibTex();
-print "\nAnd here is the RTF String:\n\n";
-print $foo->rtf();
-print "</pre>";
+echo "<pre>";
+echo "Converting This Array:\n\n";
+print_r($bibtex->data);
+echo "\nInto this:\n\n";
+echo $bibtex->bibTex();
+echo "\nAnd here is the RTF String:\n\n";
+echo $bibtex->rtf();
+echo "</pre>";
+echo "\nAnd here are the data in  HTML:\n\n";
+echo $bibtex->html();
 ?>
