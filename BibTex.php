@@ -330,7 +330,7 @@ class Structures_BibTex
                     $substring = substr($entry, 0, $position);
                     $position  = strrpos($substring,'=');
                     $proceed   = true;
-                    if (subtr($entry, $position-1, 1) == '\\') {
+                    if (substr($entry, $position-1, 1) == '\\') {
                         $proceed = false;
                     }
                     if ($proceed) {
