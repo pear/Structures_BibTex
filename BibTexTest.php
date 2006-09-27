@@ -678,6 +678,26 @@ author = {John Doe and Jane Doe}
         $test = 2;
         $this->assertTrue(PEAR::isError($this->obj->_determineCase($test)));
     }
+    
+    function testAllowedTypeTrue() {
+        $test = 'article';
+        $this->assertTrue($this->obj->_checkAllowedType($test));
+    }
+    function testAllowedTypeFalse() {
+        $test = 'foo';
+        $this->assertFalse($this->obj->_checkAllowedType($test));
+    }
+    public function testAllowedTypeWarning() {
+        $this->obj->clearWarnings();
+        $test = "@Foo { art1,
+title = {Titel1},
+author = {John Doe and Jane Doe}
+}";
+        $this->obj->content = $test;
+        $this->obj->setOption('validate', true);
+        $this->obj->parse();
+        $this->assertEquals('WARNING_NOT_ALLOWED_TYPE', $this->obj->warnings[0]['warning']);
+    }
 }
 
 // Call Structures_BibTexTest::main() if this source file is executed directly.

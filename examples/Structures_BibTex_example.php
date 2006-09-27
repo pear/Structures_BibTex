@@ -28,14 +28,19 @@ $addarray['author'][1]['last']  = 'Doe';
 $bibtex->addEntry($addarray);
 
 //Printing the result
-echo "<pre>";
 echo "Converting This Array:\n\n";
+echo "<pre>";
 print_r($bibtex->data);
 echo "\nInto this:\n\n";
 echo $bibtex->bibTex();
+echo "<hr />";
 echo "\nAnd here is the RTF String:\n\n";
 echo $bibtex->rtf();
-echo "</pre>";
+echo "<hr />";
 echo "\nAnd here are the data in  HTML:\n\n";
 echo $bibtex->html();
+echo "<hr />";
+echo "\nAnd here is the statistic:\n\n";
+print_r($bibtex->getStatistic());
+echo "</pre>";
 ?>

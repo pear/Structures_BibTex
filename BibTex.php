@@ -123,6 +123,13 @@ class Structures_BibTex
      * @var string
      */
     var $htmlstring;
+    /**
+     * Array with the "allowed" types
+     *
+     * @access public
+     * @var array
+     */
+    var $allowedTypes;
 
     /**
      * Constructor
@@ -153,8 +160,24 @@ class Structures_BibTex
                 //Currently nothing is done here, but it could for example raise an warning
             }
         }
-        $this->rtfstring  = 'AUTHORS, "{\b TITLE}", {\i JOURNAL}, YEAR';
-        $this->htmlstring = 'AUTHORS, "<strong>TITLE</strong>", <em>JOURNAL</em>, YEAR<br />';
+        $this->rtfstring    = 'AUTHORS, "{\b TITLE}", {\i JOURNAL}, YEAR';
+        $this->htmlstring   = 'AUTHORS, "<strong>TITLE</strong>", <em>JOURNAL</em>, YEAR<br />';
+        $this->allowedTypes = array(
+            'article',
+            'book',
+            'booklet',
+            'confernce',
+            'inbook',
+            'incollection',
+            'inproceedings',
+            'manual',
+            'masterthesis',
+            'misc',
+            'phdthesis',
+            'proceedings',
+            'techreport',
+            'unpublished'
+        );
     }
 
     /**
@@ -365,6 +388,11 @@ class Structures_BibTex
             if ('@' == $ret['type']{0}) {
                 $ret['type'] = substr($ret['type'], 1);
             }
+            if ($this->_options['validate']) {
+                if (!$this->_checkAllowedType($ret['type'])) {
+                    $this->_generateWarning('WARNING_NOT_ALLOWED_TYPE', $ret['type'], $entry.'}');
+                }
+            }
             //Handling the authors
             if (in_array('author', array_keys($ret))) {
                 $ret['author'] = $this->_extractAuthors($ret['author']);
@@ -436,6 +464,18 @@ class Structures_BibTex
         return $ret;
     }
 
+    /**
+     * Checking if the type is allowed
+     *
+     * @access private
+     * @param string $entry The entry to check
+     * @return bool true if allowed, false otherwise
+     */
+    function _checkAllowedType($entry)
+    {
+        return in_array($entry, $this->allowedTypes);
+    }
+    
     /**
      * Stripping Delimiter
      *
