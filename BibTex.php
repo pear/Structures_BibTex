@@ -20,7 +20,7 @@
    * @copyright  1997-2005 The PHP Group
    * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
    * @version    CVS: $Id$
-   * @link       http://pear.php.net/File/BibTex
+   * @link       http://pear.php.net/package/Structures_BibTex
    */
 
 require_once 'PEAR.php' ;
@@ -147,12 +147,13 @@ class Structures_BibTex
         //$this->_validate       = $val;
         $this->warnings        = array();
         $this->_options        = array(
-            'stripDelimiter' => true,
-            'validate'       => true,
-            'unwrap'         => false,
-            'wordWrapWidth'  => false,
-            'wordWrapBreak'  => "\n",
-            'wordWrapCut'    => 0,
+            'stripDelimiter'    => true,
+            'validate'          => true,
+            'unwrap'            => false,
+            'wordWrapWidth'     => false,
+            'wordWrapBreak'     => "\n",
+            'wordWrapCut'       => 0,
+            'removeCurlyBraces' => false,
         );
         foreach ($options as $option => $value) {
             $test = $this->setOption($option, $value);
@@ -241,6 +242,14 @@ class Structures_BibTex
         $buffer         = '';
         for ($i = 0; $i < strlen($this->content); $i++) {
             $char = substr($this->content, $i, 1);
+            if ((0 != $open) && ('@' == $char)) {
+                if (!$this->_checkAt($buffer)) {
+                    $this->_generateWarning('WARNING_MISSING_END_BRACE', '', $buffer);
+                    //To correct the data we need to insert a closing brace
+                    $char     = '}';
+                    $i--;
+                }
+            }
             if ((0 == $open) && ('@' == $char)) { //The beginning of an entry
                 $entry = true;
             } elseif ($entry && ('{' == $char) && ('\\' != $lastchar)) { //Inside an entry and non quoted brace is opening
@@ -376,6 +385,9 @@ class Structures_BibTex
                 if ($this->_options['unwrap']) {
                     $value = $this->_unwrap($value);
                 }
+                if ($this->_options['removeCurlyBraces']) {
+                    $value = $this->_removeCurlyBraces($value);
+                }
                 $position    = strrpos($entry, ',');
                 $field       = strtolower(trim(substr($entry, $position+1)));
                 $ret[$field] = $value;
@@ -477,6 +489,58 @@ class Structures_BibTex
     }
     
     /**
+     * Checking whether an at is outside an entry
+     *
+     * Sometimes an entry misses an entry brace. Then the at of the next entry seems to be
+     * inside an entry. This is checked here. When it is most likely that the at is an opening
+     * at of the next entry this method returns true.
+     *
+     * @access private
+     * @param string $entry The text of the entry until the at
+     * @return bool true if the at is correct, false if the at is likely to begin the next entry.
+     */
+    function _checkAt($entry)
+    {
+        $ret     = false;
+        $opening = array_keys($this->_delimiters);
+        $closing = array_values($this->_delimiters);
+        //Getting the value (at is only allowd in values)
+        if (strrpos($entry,'=') !== false) {
+            $position = strrpos($entry, '=');
+            $proceed  = true;
+            if (substr($entry, $position-1, 1) == '\\') {
+                $proceed = false;
+            }
+            while (!$proceed) {
+                $substring = substr($entry, 0, $position);
+                $position  = strrpos($substring,'=');
+                $proceed   = true;
+                if (substr($entry, $position-1, 1) == '\\') {
+                    $proceed = false;
+                }
+            }
+            $value    = trim(substr($entry, $position+1));
+            $open     = 0;
+            $char     = '';
+            $lastchar = '';
+            for ($i = 0; $i < strlen($value); $i++) {
+                $char = substr($this->content, $i, 1);
+                if (in_array($char, $opening) && ('\\' != $lastchar)) {
+                    $open++;
+                } elseif (in_array($char, $closing) && ('\\' != $lastchar)) {
+                    $open--;
+                }
+                $lastchar = $char;
+            }
+            //if open is grater zero were are inside an entry
+            if ($open>0) {
+                $ret = true;
+            }
+        }
+        return $ret;
+    }
+
+    /**
      * Stripping Delimiter
      *
      * @access private
@@ -486,9 +550,9 @@ class Structures_BibTex
     function _stripDelimiter($entry)
     {
         $beginningdels = array_keys($this->_delimiters);
-        $length    = strlen($entry);
-        $firstchar = substr($entry, 0, 1);
-        $lastchar  = substr($entry, -1, 1);
+        $length        = strlen($entry);
+        $firstchar     = substr($entry, 0, 1);
+        $lastchar      = substr($entry, -1, 1);
         while (in_array($firstchar, $beginningdels)) { //The first character is an opening delimiter
             if ($lastchar == $this->_delimiters[$firstchar]) { //Matches to closing Delimiter
                 $entry = substr($entry, 1, -1);
@@ -537,6 +601,7 @@ class Structures_BibTex
      * @return array the extracted authors
      */
     function _extractAuthors($entry) {
+        $entry       = $this->_unwrap($entry);
         $authorarray = array();
         $authorarray = split(' and ', $entry);
         for ($i = 0; $i < sizeof($authorarray); $i++) {
@@ -745,6 +810,41 @@ class Structures_BibTex
     }
 
     /**
+     * Remove curly braces from entry
+     *
+     * @access private
+     * @param string $value The value in which curly braces to be removed
+     * @param string Value with removed curly braces
+     */
+    function _removeCurlyBraces($value)
+    {
+        //First we save the delimiters
+        $beginningdels = array_keys($this->_delimiters);
+        $firstchar     = substr($entry, 0, 1);
+        $lastchar      = substr($entry, -1, 1);
+        $begin         = '';
+        $end           = '';
+        while (in_array($firstchar, $beginningdels)) { //The first character is an opening delimiter
+            if ($lastchar == $this->_delimiters[$firstchar]) { //Matches to closing Delimiter
+                $begin .= $firstchar;
+                $end   .= $lastchar;
+                $value  = substr($value, 1, -1);
+            } else {
+                break;
+            }
+            $firstchar = substr($value, 0, 1);
+            $lastchar  = substr($value, -1, 1);
+        }
+        //Now we get rid of the curly braces
+        $pattern     = '/([^\\\\])\{(.*?[^\\\\])\}/';
+        $replacement = '$1$2';
+        $value       = preg_replace($pattern, $replacement, $value);
+        //Reattach delimiters
+        $value       = $begin.$value.$end;
+        return $value;
+    }
+    
+    /**
      * Generates a warning
      *
      * @access private
@@ -896,7 +996,6 @@ class Structures_BibTex
      */
     function rtf()
     {
-        //$this->rtfstring = 'AUTHORS, " {\b TITLE}", {\i JOURNAL}, YEAR';
         $ret = "{\\rtf\n";
         foreach ($this->data as $entry) {
             $line    = $this->rtfstring;

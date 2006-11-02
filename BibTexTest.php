@@ -687,6 +687,7 @@ author = {John Doe and Jane Doe}
         $test = 'foo';
         $this->assertFalse($this->obj->_checkAllowedType($test));
     }
+    
     public function testAllowedTypeWarning() {
         $this->obj->clearWarnings();
         $test = "@Foo { art1,
@@ -697,6 +698,163 @@ author = {John Doe and Jane Doe}
         $this->obj->setOption('validate', true);
         $this->obj->parse();
         $this->assertEquals('WARNING_NOT_ALLOWED_TYPE', $this->obj->warnings[0]['warning']);
+    }
+    
+    public function testMissingLastBraceParsing() {
+        $this->obj->clearWarnings();
+        $test = '
+@phdthesis{foo1,
+school = {school1},
+title = {title1},
+author = {author1},
+year = {year1}
+}
+@phdthesis{foo2,
+school = {school2},
+title = {title2},
+author = {author2},
+year = {year2}
+
+@phdthesis{foo3,
+school = {school3},
+title = {title3},
+author = {author3},
+year = {year3}
+}
+@phdthesis{foo4,
+school = {school4},
+title = {title4},
+author = {author4},
+year = {year4}
+}
+        ';
+        $this->obj->content = $test;
+        $this->obj->setOption('validate', true);
+        $this->obj->parse();
+        $this->assertEquals($this->obj->amount(), 4);
+    }
+
+    public function testMissingLastBraceWarning() {
+        $this->obj->clearWarnings();
+        $test = '
+@phdthesis{foo1,
+school = {school1},
+title = {title1},
+author = {author1},
+year = {year1}
+}
+@phdthesis{foo2,
+school = {school2},
+title = {title2},
+author = {author2},
+year = {year2}
+
+@phdthesis{foo3,
+school = {school3},
+title = {title3},
+author = {author3},
+year = {year3}
+}
+@phdthesis{foo4,
+school = {school4},
+title = {title4},
+author = {author4},
+year = {year4}
+}
+        ';
+        $this->obj->content = $test;
+        $this->obj->setOption('validate', true);
+        $this->obj->parse();
+        $this->assertEquals($this->obj->warnings[0]['warning'], 'WARNING_MISSING_END_BRACE');
+    }
+
+    public function testNewlineInAuthorField() {
+        $this->obj->clearWarnings();
+        $test = '
+@phdthesis{foo1,
+school = {school1},
+title = {title1},
+author = {author1 and
+author2},
+year = {year1}
+}
+        ';
+        $shouldbe = array(array('first'=>'','von'=>'','last'=>'author1','jr'=>''), array('first'=>'','von'=>'','last'=>'author2','jr'=>''));
+        $this->obj->content = $test;
+        $this->obj->setOption('unwrap', false);
+        $this->obj->parse();
+        $this->assertEquals($shouldbe, $this->obj->data[0]['author']);
+    }
+
+    public function testNotRemoveCurlyBraces() {
+        $this->obj->clearWarnings();
+        $test = '
+@phdthesis{foo4,
+school = {school4},
+title = {Do {S}omething},
+author = {author4},
+year = {year4}
+}
+        ';
+        $shouldbe = 'Do {S}omething';
+        $this->obj->content = $test;
+        $this->obj->setOption('removeCurlyBraces', false);
+        $this->obj->parse();
+        //print_r($this->obj->data[0]['author']);
+        $this->assertEquals($shouldbe, $this->obj->data[0]['title']);
+    }
+    
+    public function testRemoveCurlyBraces() {
+        $this->obj->clearWarnings();
+        $test = '
+@phdthesis{foo4,
+school = {school4},
+title = {Do {S}omething},
+author = {author4},
+year = {year4}
+}
+        ';
+        $shouldbe = 'Do Something';
+        $this->obj->content = $test;
+        $this->obj->setOption('removeCurlyBraces', true);
+        $this->obj->parse();
+        //print_r($this->obj->data[0]['author']);
+        $this->assertEquals($shouldbe, $this->obj->data[0]['title']);
+    }
+
+    public function testRemoveCurlyBraces2() {
+        $this->obj->clearWarnings();
+        $test = '
+@phdthesis{foo4,
+school = {school4},
+title = {Do {S}o{me\}th}ing},
+author = {author4},
+year = {year4}
+}
+        ';
+        $shouldbe = 'Do Some\}thing';
+        $this->obj->content = $test;
+        $this->obj->setOption('removeCurlyBraces', true);
+        $this->obj->parse();
+        $this->assertEquals($shouldbe, $this->obj->data[0]['title']);
+    }
+
+    public function testRemoveCurlyBracesWithoutBraces() {
+        $this->obj->clearWarnings();
+        $test = '
+@phdthesis{foo4,
+school = {school4},
+title = {Do Something},
+author = {author4},
+year = {year4}
+}
+        ';
+        $shouldbe = 'Do Something';
+        $this->obj->content = $test;
+        $this->obj->setOption('removeCurlyBraces', true);
+        $this->obj->parse();
+        //print_r($this->obj->data[0]['author']);
+        $this->assertEquals($shouldbe, $this->obj->data[0]['title']);
     }
 }
 
