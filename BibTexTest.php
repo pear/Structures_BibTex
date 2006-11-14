@@ -335,7 +335,7 @@ author = {John Doe and Jane Doe}
     function testWrongBraces3() {
         $teststring = "@Article { art1,
 title = {Titel1},
-author = {John Doe and {Jane Doe}
+author = {John {Doe and {Jane Doe}
 }";
         $this->obj->content = $teststring;
         $this->assertTrue(PEAR::isError($this->obj->parse()));
@@ -734,6 +734,21 @@ year = {year4}
         $this->assertEquals($this->obj->amount(), 4);
     }
 
+    public function testMissingLastBraceParsing2() {
+        $this->obj->clearWarnings();
+        $test = '
+@phdthesis{foo1,
+school = {school1},
+title = {title1},
+author = {author1},
+year = {year1}
+        ';
+        $this->obj->content = $test;
+        $this->obj->setOption('validate', true);
+        $this->obj->parse();
+        $this->assertEquals($this->obj->amount(), 1);
+    }
+    
     public function testMissingLastBraceWarning() {
         $this->obj->clearWarnings();
         $test = '
