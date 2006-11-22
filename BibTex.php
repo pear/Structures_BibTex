@@ -130,7 +130,14 @@ class Structures_BibTex
      * @var array
      */
     var $allowedTypes;
-
+    /**
+     * Author Format Strings
+     *
+     * @access public
+     * @var string
+     */
+    var $authorstring;
+     
     /**
      * Constructor
      *
@@ -179,6 +186,7 @@ class Structures_BibTex
             'techreport',
             'unpublished'
         );
+        $this->authorstring = 'VON LAST, JR, FIRST';
     }
 
     /**
@@ -876,7 +884,8 @@ class Structures_BibTex
      *
      * @access public
      */
-    function clearWarnings() {
+    function clearWarnings()
+    {
         $this->warnings = array();
     }
 
@@ -901,6 +910,45 @@ class Structures_BibTex
     function amount()
     {
         return sizeof($this->data);
+    }
+    
+    /**
+     * Returns the author formatted
+     *
+     * The Author is formatted as setted in the authorstring
+     *
+     * @access private
+     * @param array $array Author array
+     * @return string the formatted author string
+     */
+    function _formatAuthor($array)
+    {
+        if (!array_key_exists('von', $array)) {
+            $array['von'] = '';
+        } else {
+            $array['von'] = trim($array['von']);
+        }
+        if (!array_key_exists('last', $array)) {
+            $array['last'] = '';
+        } else {
+            $array['last'] = trim($array['last']);
+        }
+        if (!array_key_exists('jr', $array)) {
+            $array['jr'] = '';
+        } else {
+            $array['jr'] = trim($array['jr']);
+        }
+        if (!array_key_exists('first', $array)) {
+            $array['first'] = '';
+        } else {
+            $array['first'] = trim($array['first']);
+        }
+        $ret = $this->authorstring;
+        $ret = str_replace("VON", $array['von'], $ret);
+        $ret = str_replace("LAST", $array['last'], $ret);
+        $ret = str_replace("JR", $array['jr'], $ret);
+        $ret = str_replace("FIRST", $array['first'], $ret);
+        return trim($ret);
     }
 
     /**
@@ -930,22 +978,7 @@ class Structures_BibTex
             if (array_key_exists('author', $entry)) {
                 $tmparray = array(); //In this array the authors are saved and the joind with an and
                 foreach ($entry['author'] as $authorentry) {
-                    /*We build the author following the third form.
-                     This is easy to build and less error-prone.
-                     In the future there sould be an option to change this!*/
-                    if (!array_key_exists('von', $authorentry)) {
-                        $authorentry['von'] = '';
-                    }
-                    if (!array_key_exists('last', $authorentry)) {
-                        $authorentry['last'] = '';
-                    }
-                    if (!array_key_exists('jr', $authorentry)) {
-                        $authorentry['jr'] = '';
-                    }
-                    if (!array_key_exists('first', $authorentry)) {
-                        $authorentry['first'] = '';
-                    }
-                    $tmparray[] = trim($authorentry['von'].' '.$authorentry['last'].', '.$authorentry['jr'].', '.$authorentry['first']);
+                    $tmparray[] = $this->_formatAuthor($authorentry);
                 }
                 $author = join(' and ', $tmparray);
             } else {
@@ -1026,31 +1059,7 @@ class Structures_BibTex
             if (array_key_exists('author', $entry)) {
                 $tmparray = array(); //In this array the authors are saved and the joind with an and
                 foreach ($entry['author'] as $authorentry) {
-                    $first = '';
-                    $von   = '';
-                    $last  = '';
-                    $jr    = '';
-                    if (array_key_exists('von', $authorentry)) {
-                        if (''!=$authorentry['von']) {
-                            $von = ' '.trim($authorentry['von']);
-                        }
-                    }
-                    if (array_key_exists('last', $authorentry)) {
-                        if (''!=$authorentry['last']) {
-                            $last = ' '.trim($authorentry['last']);
-                        }
-                    }
-                    if (array_key_exists('jr', $authorentry)) {
-                        if (''!=$authorentry['jr']) {
-                            $jr = ' '.trim($authorentry['jr']);
-                        }
-                    }
-                    if (array_key_exists('first', $authorentry)) {
-                        if (''!=$authorentry['first']) {
-                            $first = trim($authorentry['first']);
-                        }
-                    }
-                    $tmparray[] = trim($first.$von.$last.$jr);
+                    $tmparray[] = $this->_formatAuthor($authorentry);
                 }
                 $authors = join(', ', $tmparray);
             }
@@ -1103,31 +1112,7 @@ class Structures_BibTex
             if (array_key_exists('author', $entry)) {
                 $tmparray = array(); //In this array the authors are saved and the joind with an and
                 foreach ($entry['author'] as $authorentry) {
-                    $first = '';
-                    $von   = '';
-                    $last  = '';
-                    $jr    = '';
-                    if (array_key_exists('von', $authorentry)) {
-                        if (''!=$authorentry['von']) {
-                            $von = ' '.trim($authorentry['von']);
-                        }
-                    }
-                    if (array_key_exists('last', $authorentry)) {
-                        if (''!=$authorentry['last']) {
-                            $last = ' '.trim($authorentry['last']);
-                        }
-                    }
-                    if (array_key_exists('jr', $authorentry)) {
-                        if (''!=$authorentry['jr']) {
-                            $jr = ' '.trim($authorentry['jr']);
-                        }
-                    }
-                    if (array_key_exists('first', $authorentry)) {
-                        if (''!=$authorentry['first']) {
-                            $first = trim($authorentry['first']);
-                        }
-                    }
-                    $tmparray[] = trim($first.$von.$last.$jr);
+                    $tmparray[] = $this->_formatAuthor($authorentry);
                 }
                 $authors = join(', ', $tmparray);
             }

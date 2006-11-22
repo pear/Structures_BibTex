@@ -868,8 +868,90 @@ year = {year4}
         $this->obj->content = $test;
         $this->obj->setOption('removeCurlyBraces', true);
         $this->obj->parse();
-        //print_r($this->obj->data[0]['author']);
         $this->assertEquals($shouldbe, $this->obj->data[0]['title']);
+    }
+    
+    public function testRtfExport() {
+        $test = '
+@phdthesis{foo4,
+title = {title},
+author = {author},
+journal = {journal},
+year = {year}
+}
+        ';
+        $shouldbe = '{\rtf
+author title journal year
+\par
+}';
+        $this->obj->content      = $test;
+        /*Setting formating option and saving old state*/
+        $oldrtfstring            = $this->obj->rtfstring;
+        $this->obj->rtfstring    = 'AUTHORS TITLE JOURNAL YEAR';
+        $oldauthorstring         = $this->obj->authorstring;
+        $this->obj->authorstring = 'LAST';
+        $this->obj->parse();
+        
+        $rtf = $this->obj->rtf();
+        /*Resetting old state*/
+        $this->obj->rtfstring    = $oldrtfstring;
+        $this->obj->authorstring = $oldauthorstring;
+        
+        $this->assertEquals($shouldbe, $rtf);
+    }
+
+    public function testHtmlExport() {
+        $test = '
+@phdthesis{foo4,
+title = {title},
+author = {author},
+journal = {journal},
+year = {year}
+}
+        ';
+        $shouldbe = '<p>
+author title journal year
+</p>
+';
+        $this->obj->content      = $test;
+        /*Setting formating option and saving old state*/
+        $oldhtmlstring           = $this->obj->htmlstring;
+        $this->obj->htmlstring   = 'AUTHORS TITLE JOURNAL YEAR';
+        $oldauthorstring         = $this->obj->authorstring;
+        $this->obj->authorstring = 'LAST';
+        $this->obj->parse();
+        
+        $html = $this->obj->html();
+        /*Resetting old state*/
+        $this->obj->htmlstring   = $oldhtmlstring;
+        $this->obj->authorstring = $oldauthorstring;
+        
+        $this->assertEquals($shouldbe, $html);
+    }
+
+    public function testFormatAuthor() {
+        $test = '
+@phdthesis{foo4,
+author = {von Last, Jr ,First}
+}
+        ';
+        $shouldbe = 'von Last Jr First';
+        $this->obj->content      = $test;
+        /*Setting formating option and saving old state*/
+        $oldhtmlstring           = $this->obj->htmlstring;
+        $this->obj->htmlstring   = 'AUTHORS';
+        $oldauthorstring         = $this->obj->authorstring;
+        $this->obj->authorstring = 'VON LAST JR FIRST';
+        $this->obj->parse();
+        
+        $html = $this->obj->html();
+        /*Dropping tags and trimming*/
+        $html = trim(strip_tags($html));
+        /*Resetting old state*/
+        $this->obj->htmlstring   = $oldhtmlstring;
+        $this->obj->authorstring = $oldauthorstring;
+        
+        $this->assertEquals($shouldbe, $html);
     }
 }
 
