@@ -1,60 +1,83 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<package version="1.0" packagerversion="1.4.6">
-    <name>Structures_BibTex</name>
-    <summary>Handling of BibTex Data.</summary>
-    <description>Parsing BibTex data to an array and converting an array to BibTex Data and export it to various formats.
-    </description>
-    <maintainers>
-        <maintainer>
-            <user>hugoki</user>
-            <name>Elmar Pitschke</name>
-            <email>elmar.pitschke@gmx.de</email>
-            <role>lead</role>
-        </maintainer>
-    </maintainers>
-    <release>
-        <version>0.2.0</version>
-        <date>2006-07-28</date>
-        <license>PHP License</license>
-        <state>beta</state>
-        <notes>This release introduces RTF and HTML formatter. And the source code is cleaned of some possible error sources. Now most of the things from ToDo are implemented and most of the left over work is bug tracking.
-        </notes>
-        <provides type="class" name="Structures_BibTex" />
-        <provides type="function" name="Structures_BibTex::setOption" />
-        <provides type="function" name="Structures_BibTex::loadFile" />
-        <provides type="function" name="Structures_BibTex::parse" />
-        <provides type="function" name="Structures_BibTex::clearWarnings" />
-        <provides type="function" name="Structures_BibTex::hasWarning" />
-        <provides type="function" name="Structures_BibTex::amount" />
-        <provides type="function" name="Structures_BibTex::bibTex" />
-        <provides type="function" name="Structures_BibTex::addEntry" />
-        <provides type="function" name="Structures_BibTex::getStatistic" />
-        <provides type="function" name="Structures_BibTex::rtf" />
-        <provides type="function" name="Structures_BibTex::html" />
-        <filelist>
-            <dir name="examples">
-                <file role="doc" baseinstalldir="Structures/" name="Structures_BibTex_example.php"/>
-            </dir> <!-- /examples -->
-            <file role="php" baseinstalldir="Structures/" name="BibTex.php"/>
-        </filelist>
-    </release>
-    <changelog>
-        <release>
-            <version>0.2.0</version>
-            <date>2006-07-28</date>
-            <license>PHP License</license>
-            <state>beta</state>
-            <notes>This release introduces RTF and HTML formatter. And the source code is cleaned of some possible error sources. Now most of the things from ToDo are implemented and most of the left over work is bug tracking.
-            </notes>
-        </release>
-        <release>
-            <version>0.1.0</version>
-            <date>2006-06-24</date>
-            <license>PHP License</license>
-            <state>beta</state>
-            <notes>Most things are implemented others like &quot;String&quot; are on the ToDo.
-            </notes>
-        </release>
-    </changelog>
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.4.11" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+http://pear.php.net/dtd/tasks-1.0.xsd
+http://pear.php.net/dtd/package-2.0
+http://pear.php.net/dtd/package-2.0.xsd">
+ <name>Structures_BibTex</name>
+ <channel>pear.php.net</channel>
+ <summary>Handling of BibTex Data.</summary>
+ <description>Parsing BibTex data to an array and converting an array to BibTex Data and export it to various formats. </description>
+ <lead>
+  <name>Elmar Pitschke</name>
+  <user>hugoki</user>
+  <email>elmar.pitschke@gmx.de</email>
+  <active>yes</active>
+ </lead>
+ <date>2006-12-05</date>
+ <time>20:26:27</time>
+ <version>
+  <release>0.3.0</release>
+  <api>0.3.0</api>
+ </version>
+ <stability>
+  <release>beta</release>
+  <api>beta</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP License</license>
+ <notes>
+ * Validation now includes checking the type of the entry
+ * Added possibility to remove curly braces in value
+ * Now a warning is generated when the closing brace of an entry is missing. And it is now parsed correctly.
+ * Bug Hunting: When the value of the author entry had a newline it was parsed wrong. This is now fixed by unwrapping the author fields prior to extracting the authors.
+ * Bug hunting: now also a warning is generated when the very last entry has a missing closing brace
+ * The output of the Author can now be set via the authorstring
+ This should be the final release before the stable 1.0 release.
+ </notes>
+ <contents>
+  <dir name="/">
+   <dir name="examples">
+    <file baseinstalldir="Structures/" name="Structures_BibTex_example.php" role="doc" />
+   </dir> <!-- //examples -->
+   <file baseinstalldir="Structures/" name="BibTex.php" role="php" />
+  </dir> <!-- / -->
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>4.0.0</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.0b1</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+ <phprelease />
+ <changelog>
+  <release>
+   <version>
+    <release>0.2.0</release>
+    <api>0.2.0</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2006-07-28</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>This release introduces RTF and HTML formatter. And the source code is cleaned of some possible error sources. Now most of the things from ToDo are implemented and most of the left over work is bug tracking.</notes>
+  </release>
+  <release>
+   <version>
+    <release>0.1.0</release>
+    <api>0.1.0</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2006-06-24</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>Most things are implemented others like &quot;String&quot; are on the ToDo.</notes>
+  </release>
+ </changelog>
 </package>
