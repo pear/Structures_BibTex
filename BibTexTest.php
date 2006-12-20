@@ -953,6 +953,26 @@ author = {von Last, Jr ,First}
         
         $this->assertEquals($shouldbe, $html);
     }
+    
+    public function testExtractAuthorWhitespace() {
+        $test = 'John Doe';
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'John';
+        $shouldbe[0]['von']   = '';
+        $shouldbe[0]['last']  = 'Doe';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
+
+    public function testExtractAuthorTilde() {
+        $test = 'John~Doe';
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'John';
+        $shouldbe[0]['von']   = '';
+        $shouldbe[0]['last']  = 'Doe';
+        $shouldbe[0]['jr']    = '';
+        $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
+    }
 }
 
 // Call Structures_BibTexTest::main() if this source file is executed directly.
