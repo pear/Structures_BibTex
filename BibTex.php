@@ -53,13 +53,15 @@ require_once 'PEAR.php' ;
  * </code>
  * Example 3: Adding an entry and printing it in BibTex Format
  * <code>
- * $bibtex                = new Structures_BibTex();
- * $addarray              = array();
- * $addarray['type']      = 'Article';
- * $addarray['cite']      = 'art2';
- * $addarray['title']     = 'Titel2';
- * $addarray['author'][0] = 'John Doe';
- * $addarray['author'][1] = 'Jane Doe';
+ * $bibtex                         = new Structures_BibTex();
+ * $addarray                       = array();
+ * $addarray['type']               = 'Article';
+ * $addarray['cite']               = 'art2';
+ * $addarray['title']              = 'Titel2';
+ * $addarray['author'][0]['first'] = 'John';
+ * $addarray['author'][0]['last']  = 'Doe';
+ * $addarray['author'][1]['first'] = 'Jane';
+ * $addarray['author'][1]['last']  = 'Doe';
  * $bibtex->addEntry($addarray);
  * print nl2br($bibtex->bibTex());
  * </code>

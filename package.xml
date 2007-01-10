@@ -13,26 +13,18 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>elmar.pitschke@gmx.de</email>
   <active>yes</active>
  </lead>
- <date>2006-12-05</date>
- <time>20:26:27</time>
+ <date>2007-01-10</date>
+ <time>11:00:00</time>
  <version>
-  <release>0.3.0</release>
-  <api>0.3.0</api>
+  <release>1.0.0RC1</release>
+  <api>1.0.0RC1</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>
- * Validation now includes checking the type of the entry
- * Added possibility to remove curly braces in value
- * Now a warning is generated when the closing brace of an entry is missing. And it is now parsed correctly.
- * Bug Hunting: When the value of the author entry had a newline it was parsed wrong. This is now fixed by unwrapping the author fields prior to extracting the authors.
- * Bug hunting: now also a warning is generated when the very last entry has a missing closing brace
- * The output of the Author can now be set via the authorstring
- This should be the final release before the stable 1.0 release.
- </notes>
+ <notes>The first Release Candidate. Only one change to the previouse version, now ~ is identified as white space.</notes>
  <contents>
   <dir name="/">
    <dir name="examples">
@@ -53,6 +45,26 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.3.0</release>
+    <api>0.3.0</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>
+ * Validation now includes checking the type of the entry
+ * Added possibility to remove curly braces in value
+ * Now a warning is generated when the closing brace of an entry is missing. And it is now parsed correctly.
+ * Bug Hunting: When the value of the author entry had a newline it was parsed wrong. This is now fixed by unwrapping the author fields prior to extracting the authors.
+ * Bug hunting: now also a warning is generated when the very last entry has a missing closing brace
+ * The output of the Author can now be set via the authorstring
+ This should be the final release before the stable 1.0 release.
+   </notes>
+  </release>
   <release>
    <version>
     <release>0.2.0</release>
