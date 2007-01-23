@@ -16,20 +16,25 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <date>2007-01-10</date>
  <time>11:00:00</time>
  <version>
-  <release>1.0.0RC1</release>
-  <api>1.0.0RC1</api>
+  <release>1.0.0RC2</release>
+  <api>1.0.0RC2</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>The first Release Candidate. Only one change to the previouse version, now ~ is identified as white space.</notes>
+ <notes>The second Release Candidate. Moved the Files to the correct paths</notes>
  <contents>
   <dir name="/">
-   <dir name="examples">
-    <file baseinstalldir="Structures/" name="Structures_BibTex_example.php" role="doc" />
-   </dir> <!-- //examples -->
+   <dir name="docs">
+    <dir name="examples">
+     <file baseinstalldir="Structures/" name="Structures_BibTex_example.php" role="doc" />
+    </dir> <!-- //examples -->
+   </dir> <!-- //docs -->
+   <dir name="tests">
+    <file baseinstalldir="Structures/" name="BibTexTest.php" role="test" />
+   </dir> <!-- //tests -->
    <file baseinstalldir="Structures/" name="BibTex.php" role="php" />
   </dir> <!-- / -->
  </contents>
@@ -45,6 +50,18 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>1.0.0RC1</release>
+    <api>1.0.0RC1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>The first Release Candidate. Only one change to the previouse version, now ~ is identified as white space.</notes>
+  </release>
   <release>
    <version>
     <release>0.3.0</release>
