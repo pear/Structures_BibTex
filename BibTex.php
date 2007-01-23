@@ -163,6 +163,7 @@ class Structures_BibTex
             'wordWrapBreak'     => "\n",
             'wordWrapCut'       => 0,
             'removeCurlyBraces' => false,
+            'extractAuthors'    => true,
         );
         foreach ($options as $option => $value) {
             $test = $this->setOption($option, $value);
@@ -427,7 +428,7 @@ class Structures_BibTex
                 }
             }
             //Handling the authors
-            if (in_array('author', array_keys($ret))) {
+            if (in_array('author', array_keys($ret)) && $this->_options['extractAuthors']) {
                 $ret['author'] = $this->_extractAuthors($ret['author']);
             }
         }
@@ -979,11 +980,15 @@ class Structures_BibTex
             }
             //Author
             if (array_key_exists('author', $entry)) {
-                $tmparray = array(); //In this array the authors are saved and the joind with an and
-                foreach ($entry['author'] as $authorentry) {
-                    $tmparray[] = $this->_formatAuthor($authorentry);
+                if ($this->_options['extractAuthors']) {
+                    $tmparray = array(); //In this array the authors are saved and the joind with an and
+                    foreach ($entry['author'] as $authorentry) {
+                        $tmparray[] = $this->_formatAuthor($authorentry);
+                    }
+                    $author = join(' and ', $tmparray);
+                } else {
+                    $author = $entry['author'];
                 }
-                $author = join(' and ', $tmparray);
             } else {
                 $author = '';
             }
@@ -1060,11 +1065,15 @@ class Structures_BibTex
                 $year = $this->_unwrap($entry['year']);
             }
             if (array_key_exists('author', $entry)) {
-                $tmparray = array(); //In this array the authors are saved and the joind with an and
-                foreach ($entry['author'] as $authorentry) {
-                    $tmparray[] = $this->_formatAuthor($authorentry);
+                if ($this->_options['extractAuthors']) {
+                    $tmparray = array(); //In this array the authors are saved and the joind with an and
+                    foreach ($entry['author'] as $authorentry) {
+                        $tmparray[] = $this->_formatAuthor($authorentry);
+                    }
+                    $authors = join(', ', $tmparray);
+                } else {
+                    $authors = $entry['author'];
                 }
-                $authors = join(', ', $tmparray);
             }
             if ((''!=$title) || (''!=$journal) || (''!=$year) || (''!=$authors)) {
                 $line = str_replace("TITLE", $title, $line);
@@ -1113,11 +1122,15 @@ class Structures_BibTex
                 $year = $this->_unwrap($entry['year']);
             }
             if (array_key_exists('author', $entry)) {
-                $tmparray = array(); //In this array the authors are saved and the joind with an and
-                foreach ($entry['author'] as $authorentry) {
-                    $tmparray[] = $this->_formatAuthor($authorentry);
+                if ($this->_options['extractAuthors']) {
+                    $tmparray = array(); //In this array the authors are saved and the joind with an and
+                    foreach ($entry['author'] as $authorentry) {
+                        $tmparray[] = $this->_formatAuthor($authorentry);
+                    }
+                    $authors = join(', ', $tmparray);
+                } else {
+                    $authors = $entry['author'];
                 }
-                $authors = join(', ', $tmparray);
             }
             if ((''!=$title) || (''!=$journal) || (''!=$year) || (''!=$authors)) {
                 $line = str_replace("TITLE", $title, $line);

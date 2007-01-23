@@ -973,6 +973,73 @@ author = {von Last, Jr ,First}
         $shouldbe[0]['jr']    = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
+    
+    public function testNotExtractAuthors() {
+        $this->obj->clearWarnings();
+        $test = '
+@phdthesis{foo4,
+author = {John Doe},
+}
+        ';
+        $shouldbe = 'John Doe';
+        $this->obj->content = $test;
+        $this->obj->setOption('extractAuthors', false);
+        $this->obj->parse();
+        $this->assertEquals($shouldbe, $this->obj->data[0]['author']);
+    }
+
+    public function testExtractAuthors() {
+        $this->obj->clearWarnings();
+        $test = '
+@phdthesis{foo4,
+author = {John Doe},
+}
+        ';
+        $shouldbe = array();
+        $shouldbe[0]['first'] = 'John';
+        $shouldbe[0]['von']   = '';
+        $shouldbe[0]['last']  = 'Doe';
+        $shouldbe[0]['jr']    = '';
+        $this->obj->content = $test;
+        $this->obj->setOption('extractAuthors', true);
+        $this->obj->parse();
+        $this->assertEquals($shouldbe, $this->obj->data[0]['author']);
+    }
+    
+    public function testNotExtractAuthorsBibtexExport() {
+        $this->obj->clearWarnings();
+        $test = "@phdthesis { foo4,\n\tauthor = {John Doe}\n}\n\n";
+        $this->obj->content = $test;
+        $this->obj->setOption('extractAuthors', false);
+        $this->obj->parse();
+        $this->assertEquals($test, $this->obj->bibTex());
+    }
+
+    public function testNotExtractAuthorsRtfExport() {
+        $this->obj->clearWarnings();
+        $test = "@phdthesis { foo4,\n\tauthor = {John Doe}\n}\n\n";
+        $shouldbe = '{\rtf
+John Doe, "{\b }", {\i }, 
+\par
+}';
+        $this->obj->content = $test;
+        $this->obj->setOption('extractAuthors', false);
+        $this->obj->parse();
+        $this->assertEquals($shouldbe, $this->obj->rtf());
+    }
+
+    public function testNotExtractAuthorsHtmlExport() {
+        $this->obj->clearWarnings();
+        $test = "@phdthesis { foo4,\n\tauthor = {John Doe}\n}\n\n";
+        $shouldbe = '<p>
+John Doe, "<strong></strong>", <em></em>, <br />
+</p>
+';
+        $this->obj->content = $test;
+        $this->obj->setOption('extractAuthors', false);
+        $this->obj->parse();
+        $this->assertEquals($shouldbe, $this->obj->html());
+    }
 }
 
 // Call Structures_BibTexTest::main() if this source file is executed directly.
