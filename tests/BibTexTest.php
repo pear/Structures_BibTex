@@ -10,7 +10,7 @@ require_once "PHPUnit2/Framework/TestSuite.php";
 // You may remove the following line when all tests have been implemented.
 require_once "PHPUnit2/Framework/IncompleteTestError.php";
 
-require_once "./BibTex.php";
+require_once "Structures/BibTex.php";
 require_once "PEAR.php";
 
 /**
