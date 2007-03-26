@@ -69,11 +69,11 @@ class BibTexTest extends PHPUnit2_Framework_TestCase
      */
     public function test_parseEntry() {
         //Remember here that there is no closing brace!
-        $test = "@foo{bar,john=doe";
-        $shouldbe = array();
-        $shouldbe['john'] = 'doe';
-        $shouldbe['cite'] = 'bar';
-        $shouldbe['type'] = 'foo';
+        $test                  = "@foo{bar,john=doe";
+        $shouldbe              = array();
+        $shouldbe['john']      = 'doe';
+        $shouldbe['cite']      = 'bar';
+        $shouldbe['entryType'] = 'foo';
         $this->assertEquals($shouldbe, $this->obj->_parseEntry($test));
     }
 
@@ -186,9 +186,9 @@ title = {Titel1},
 author = {John Doe and Jane Doe}
 }";
         $shouldbe = array();
-        $shouldbe[0]['type'] = 'article';
-        $shouldbe[0]['cite'] = 'art1';
-        $shouldbe[0]['title'] = 'Titel1';
+        $shouldbe[0]['entryType'] = 'article';
+        $shouldbe[0]['cite']      = 'art1';
+        $shouldbe[0]['title']     = 'Titel1';
         $shouldbe[0]['author'][0]['first'] = 'John';
         $shouldbe[0]['author'][0]['von']   = '';
         $shouldbe[0]['author'][0]['last']  = 'Doe';
@@ -205,9 +205,9 @@ author = {John Doe and Jane Doe}
     function testBibTex()
     {
         $testarray = array();
-        $testarray[0]['type'] = 'Article';
-        $testarray[0]['cite'] = 'art1';
-        $testarray[0]['title'] = 'Titel1';
+        $testarray[0]['entryType'] = 'Article';
+        $testarray[0]['cite']      = 'art1';
+        $testarray[0]['title']     = 'Titel1';
         $testarray[0]['author'][0]['first'] = 'John';
         $testarray[0]['author'][0]['von']   = '';
         $testarray[0]['author'][0]['last']  = 'Doe';
@@ -253,9 +253,9 @@ author = {John Doe and Jane Doe}
   isbn =         \"0-486-61272-4\"
 }";
         $shouldbe = array();
-        $shouldbe[0]['type']  = 'book';
-        $shouldbe[0]['cite']  = 'abramowitz+stegun';
-        $shouldbe[0]['title'] = "Handbook of Mathematical Functions with
+        $shouldbe[0]['entryType']  = 'book';
+        $shouldbe[0]['cite']       = 'abramowitz+stegun';
+        $shouldbe[0]['title']      = "Handbook of Mathematical Functions with
                   Formulas, Graphs, and Mathematical Tables";
         $shouldbe[0]['author'][0]['first'] = 'Milton';
         $shouldbe[0]['author'][0]['von']   = '';
@@ -287,9 +287,9 @@ title = {Titel2},
 author = {John Doe and Jane Doe}
 }";
         $shouldbe = array();
-        $shouldbe[0]['type'] = 'article';
-        $shouldbe[0]['cite'] = 'art1';
-        $shouldbe[0]['title'] = 'Titel1';
+        $shouldbe[0]['entryType'] = 'article';
+        $shouldbe[0]['cite']      = 'art1';
+        $shouldbe[0]['title']     = 'Titel1';
         $shouldbe[0]['author'][0]['first'] = 'John';
         $shouldbe[0]['author'][0]['von']   = '';
         $shouldbe[0]['author'][0]['last']  = 'Doe';
@@ -298,9 +298,9 @@ author = {John Doe and Jane Doe}
         $shouldbe[0]['author'][1]['von']   = '';
         $shouldbe[0]['author'][1]['last']  = 'Doe';
         $shouldbe[0]['author'][1]['jr']    = '';
-        $shouldbe[1]['type'] = 'article';
-        $shouldbe[1]['cite'] = 'art2';
-        $shouldbe[1]['title'] = 'Titel2';
+        $shouldbe[1]['entryType'] = 'article';
+        $shouldbe[1]['cite']      = 'art2';
+        $shouldbe[1]['title']     = 'Titel2';
         $shouldbe[1]['author'][0]['first'] = 'John';
         $shouldbe[1]['author'][0]['von']   = '';
         $shouldbe[1]['author'][0]['last']  = 'Doe';
@@ -319,7 +319,7 @@ author = {John Doe and Jane Doe}
 	 title = {Tit}el1},
 	 author = {John Doe and Jane Doe}
 	 }";
-	 $this->obj->content = $teststring;
+        $this->obj->content = $teststring;
 	 $this->assertTrue(PEAR::isError($this->obj->parse()));
 	 }
 
@@ -681,11 +681,11 @@ author = {John Doe and Jane Doe}
     
     function testAllowedTypeTrue() {
         $test = 'article';
-        $this->assertTrue($this->obj->_checkAllowedType($test));
+        $this->assertTrue($this->obj->_checkAllowedEntryType($test));
     }
     function testAllowedTypeFalse() {
         $test = 'foo';
-        $this->assertFalse($this->obj->_checkAllowedType($test));
+        $this->assertFalse($this->obj->_checkAllowedEntryType($test));
     }
     
     public function testAllowedTypeWarning() {
@@ -697,7 +697,7 @@ author = {John Doe and Jane Doe}
         $this->obj->content = $test;
         $this->obj->setOption('validate', true);
         $this->obj->parse();
-        $this->assertEquals('WARNING_NOT_ALLOWED_TYPE', $this->obj->warnings[0]['warning']);
+        $this->assertEquals('WARNING_NOT_ALLOWED_ENTRY_TYPE', $this->obj->warnings[0]['warning']);
     }
     
     public function testMissingLastBraceParsing() {

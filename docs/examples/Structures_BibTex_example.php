@@ -2,7 +2,6 @@
 error_reporting(E_ALL);
 
 require_once 'PEAR.php';
-//require_once './Structures_BibTex.php';
 require_once 'Structures/BibTex.php';
 
 $bibtex = new Structures_BibTex();
@@ -17,7 +16,7 @@ $bibtex->parse();
 
 //Creating an entry
 $addarray = array();
-$addarray['type']               = 'Article';
+$addarray['entryType']          = 'Article';
 $addarray['cite']               = 'art2';
 $addarray['title']              = 'Titel2';
 $addarray['author'][0]['first'] = 'John';

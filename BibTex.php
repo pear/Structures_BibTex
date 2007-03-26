@@ -55,7 +55,7 @@ require_once 'PEAR.php' ;
  * <code>
  * $bibtex                         = new Structures_BibTex();
  * $addarray                       = array();
- * $addarray['type']               = 'Article';
+ * $addarray['entryType']          = 'Article';
  * $addarray['cite']               = 'art2';
  * $addarray['title']              = 'Titel2';
  * $addarray['author'][0]['first'] = 'John';
@@ -126,12 +126,12 @@ class Structures_BibTex
      */
     var $htmlstring;
     /**
-     * Array with the "allowed" types
+     * Array with the "allowed" entry types
      *
      * @access public
      * @var array
      */
-    var $allowedTypes;
+    var $allowedEntryTypes;
     /**
      * Author Format Strings
      *
@@ -171,9 +171,9 @@ class Structures_BibTex
                 //Currently nothing is done here, but it could for example raise an warning
             }
         }
-        $this->rtfstring    = 'AUTHORS, "{\b TITLE}", {\i JOURNAL}, YEAR';
-        $this->htmlstring   = 'AUTHORS, "<strong>TITLE</strong>", <em>JOURNAL</em>, YEAR<br />';
-        $this->allowedTypes = array(
+        $this->rtfstring         = 'AUTHORS, "{\b TITLE}", {\i JOURNAL}, YEAR';
+        $this->htmlstring        = 'AUTHORS, "<strong>TITLE</strong>", <em>JOURNAL</em>, YEAR<br />';
+        $this->allowedEntryTypes = array(
             'article',
             'book',
             'booklet',
@@ -415,16 +415,16 @@ class Structures_BibTex
                 $ret[$field] = $value;
                 $entry       = substr($entry, 0, $position);
             }
-            //Parsing cite and type
+            //Parsing cite and entry type
             $arr = split('{', $entry);
             $ret['cite'] = trim($arr[1]);
-            $ret['type'] = strtolower(trim($arr[0]));
-            if ('@' == $ret['type']{0}) {
-                $ret['type'] = substr($ret['type'], 1);
+            $ret['entryType'] = strtolower(trim($arr[0]));
+            if ('@' == $ret['entryType']{0}) {
+                $ret['entryType'] = substr($ret['entryType'], 1);
             }
             if ($this->_options['validate']) {
-                if (!$this->_checkAllowedType($ret['type'])) {
-                    $this->_generateWarning('WARNING_NOT_ALLOWED_TYPE', $ret['type'], $entry.'}');
+                if (!$this->_checkAllowedEntryType($ret['entryType'])) {
+                    $this->_generateWarning('WARNING_NOT_ALLOWED_ENTRY_TYPE', $ret['entryType'], $entry.'}');
                 }
             }
             //Handling the authors
@@ -499,15 +499,15 @@ class Structures_BibTex
     }
 
     /**
-     * Checking if the type is allowed
+     * Checking if the entry type is allowed
      *
      * @access private
      * @param string $entry The entry to check
      * @return bool true if allowed, false otherwise
      */
-    function _checkAllowedType($entry)
+    function _checkAllowedEntryType($entry)
     {
-        return in_array($entry, $this->allowedTypes);
+        return in_array($entry, $this->allowedEntryTypes);
     }
     
     /**
@@ -968,13 +968,13 @@ class Structures_BibTex
         $bibtex = '';
         foreach ($this->data as $entry) {
             //Intro
-            $bibtex .= '@'.strtolower($entry['type']).' { '.$entry['cite'].",\n";
+            $bibtex .= '@'.strtolower($entry['entryType']).' { '.$entry['cite'].",\n";
             //Other fields except author
             foreach ($entry as $key=>$val) {
                 if ($this->_options['wordWrapWidth']>0) {
                     $val = $this->_wordWrap($val);
                 }
-                if (!in_array($key, array('cite','type','author'))) {
+                if (!in_array($key, array('cite','entryType','author'))) {
                     $bibtex .= "\t".$key.' = {'.$val."},\n";
                 }
             }
@@ -1023,10 +1023,10 @@ class Structures_BibTex
     {
         $ret = array();
         foreach ($this->data as $entry) {
-            if (array_key_exists($entry['type'], $ret)) {
-                $ret[$entry['type']]++;
+            if (array_key_exists($entry['entryType'], $ret)) {
+                $ret[$entry['entryType']]++;
             } else {
-                $ret[$entry['type']] = 1;
+                $ret[$entry['entryType']] = 1;
             }
         }
         return $ret;
