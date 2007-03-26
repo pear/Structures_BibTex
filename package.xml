@@ -13,18 +13,18 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>elmar.pitschke@gmx.de</email>
   <active>yes</active>
  </lead>
- <date>2007-01-25</date>
- <time>21:20:00</time>
+ <date>2007-03-26</date>
+ <time>23:30:00</time>
  <version>
-  <release>1.0.0RC3</release>
-  <api>1.0.0RC3</api>
+  <release>1.0.0RC4</release>
+  <api>1.0.0RC4</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>The third Release Candidate. Added a new feature as requested (Request #9878  	Unable to parse bibtex without authors being spit into an array)</notes>
+ <notes>The fourth Release Candidate. Solved Bug #10466 (Do not use "type" for the entry type!). Now "entryType" is used as key instead of "type". This should now not conflict anymore with BibTeX keys.</notes>
  <contents>
   <dir name="/">
    <dir name="docs">
@@ -50,6 +50,18 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>1.0.0RC3</release>
+    <api>1.0.0RC3</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>The third Release Candidate. Added a new feature as requested (Request #9878 Unable to parse bibtex without authors being spit into an array)</notes>
+  </release>
   <release>
    <version>
     <release>1.0.0RC2</release>
