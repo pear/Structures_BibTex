@@ -182,7 +182,7 @@ class Structures_BibTex
             'incollection',
             'inproceedings',
             'manual',
-            'masterthesis',
+            'mastersthesis',
             'misc',
             'phdthesis',
             'proceedings',
