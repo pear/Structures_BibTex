@@ -416,7 +416,7 @@ class Structures_BibTex
                 $entry       = substr($entry, 0, $position);
             }
             //Parsing cite and entry type
-            $arr = split('{', $entry);
+            $arr = explode('{', $entry);
             $ret['cite'] = trim($arr[1]);
             $ret['entryType'] = strtolower(trim($arr[0]));
             if ('@' == $ret['entryType']{0}) {
@@ -625,7 +625,7 @@ class Structures_BibTex
     function _extractAuthors($entry) {
         $entry       = $this->_unwrap($entry);
         $authorarray = array();
-        $authorarray = split(' and ', $entry);
+        $authorarray = explode(' and ', $entry);
         for ($i = 0; $i < sizeof($authorarray); $i++) {
             $author = trim($authorarray[$i]);
             /*The first version of how an author could be written (First von Last)
@@ -637,7 +637,7 @@ class Structures_BibTex
             if (strpos($author, ',') === false) {
                 $tmparray = array();
                 //$tmparray = explode(' ', $author);
-                $tmparray = split(' |~', $author);
+                $tmparray = explode(' |~', $author);
                 $size     = sizeof($tmparray);
                 if (1 == $size) { //There is only a last
                     $last = $tmparray[0];
