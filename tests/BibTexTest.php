@@ -21,17 +21,6 @@ class BibTexTest extends PHPUnit_Framework_TestCase
 {
     var $obj;
 
-    /**
-     * Runs the test methods of this class.
-     *
-     * @access public
-     * @static
-     */
-    public static function main() {
-        require_once "PHPUnit/TextUI/TestRunner.php";
-        $suite  = new PHPUnit_Framework_TestSuite("Structures_BibTexTest");
-        $result = PHPUnit_TextUI_TestRunner::run($suite);
-    }
 
     /**
      * Sets up the fixture, for example, open a network connection.
@@ -1042,8 +1031,3 @@ John Doe, "<strong></strong>", <em></em>, <br />
     }
 }
 
-// Call Structures_BibTexTest::main() if this source file is executed directly.
-if (PHPUnit_MAIN_METHOD == "BibTexTest::main") {
-    BibTexTest::main();
- }
-?>
