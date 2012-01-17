@@ -11,7 +11,6 @@ require_once "PHPUnit/Framework/TestSuite.php";
 require_once "PHPUnit/Framework/IncompleteTestError.php";
 
 require_once "Structures/BibTex.php";
-require_once "PEAR.php";
 
 /**
  * Test class for Structures_BibTex.
@@ -1055,5 +1054,19 @@ John Doe, "<strong></strong>", <em></em>, <br />
         $this->obj->parse();
         $this->assertEquals($shouldbe, $this->obj->html());
     }
+
+    function testRemoveCurlyBracesDespiteStrangeCapitalisation()
+    {
+        $this->obj->setOption('removeCurlyBraces', true);
+
+        $teststring = "@ARTICLE{FOO,
+  title = {{FoOBaR}: A system with {StrAnGe} capitalization},
+}";
+        $this->obj->content = $teststring;
+        $this->obj->parse();
+
+        $this->assertEquals('FoOBaR: A system with StrAnGe capitalization',$this->obj->data[0]['title']);
+    }
+
 }
 

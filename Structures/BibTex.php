@@ -19,7 +19,7 @@
    * @author     Elmar Pitschke <elmar.pitschke@gmx.de>
    * @copyright  1997-2005 The PHP Group
    * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
-   * @version    CVS: $Id$
+   * @version    CVS: $Id: BibTex.php 322412 2012-01-17 14:25:28Z clockwerx $
    * @link       http://pear.php.net/package/Structures_BibTex
    */
 
@@ -866,7 +866,7 @@ class Structures_BibTex
             $lastchar  = substr($value, -1, 1);
         }
         //Now we get rid of the curly braces
-        $pattern     = '/([^\\\\])\{(.*?[^\\\\])\}/';
+        $pattern     = '/([^\\\\]|^)?\{(.*?[^\\\\])\}/';
         $replacement = '$1$2';
         $value       = preg_replace($pattern, $replacement, $value);
         //Reattach delimiters
