@@ -338,7 +338,7 @@ author = {John {Doe and {Jane Doe}
 
             $this->fail("Expected an exception");
         } catch (Structures_BibTex_Exception $sbe) {
-            $this->assertContains("braces", $sbe->getMessage());
+            $this->assertContains("Unbalanced parenthesis", $sbe->getMessage());
         }
     }
 
