@@ -982,7 +982,7 @@ class Structures_BibTex
                     $val = $this->_wordWrap($val);
                 }
                 if (!in_array($key, array('cite','entryType','author'))) {
-                    $bibtex .= "\t".$key.' = {'.$val."},\n";
+                    $bibtex .= "\t".$key.' = {'.$this->_escape_tex($val)."},\n";
                 }
             }
             //Author
@@ -999,7 +999,7 @@ class Structures_BibTex
             } else {
                 $author = '';
             }
-            $bibtex .= "\tauthor = {".$author."}\n";
+            $bibtex .= "\tauthor = {".$this->_escape_tex($author)."}\n";
             $bibtex.="}\n\n";
         }
         return $bibtex;
@@ -1152,6 +1152,35 @@ class Structures_BibTex
         }
         $ret .= "</p>\n";
         return $ret;
+    }
+    
+    /**
+     * Returns a string with special TeX characters escaped.
+     *
+     * This method is to be used with any method which is exporting TeX, such 
+     * as the bibTex method. A series of string replace operations are 
+     * performed on the input string, and the escaped string is returned.
+     * 
+     * This code is taken from the Text_Wiki Pear package.
+     * 
+     * @author Jeremy Cowgar <jeremy@cowgar.com>
+     * 
+     * @access private
+     * @param string $txt the TeX string
+     * @return string the escaped TeX string
+     */
+    function _escape_tex($tex)
+    {
+        $tex = str_replace("\\", "\\\\", $tex);
+        $tex = str_replace('#', '\#', $tex);
+        $tex = str_replace('$', '\$', $tex);
+        $tex = str_replace('%', '\%', $tex);
+        $tex = str_replace('^', '\^', $tex);
+        $tex = str_replace('&', '\&', $tex);
+        $tex = str_replace('_', '\_', $tex);
+        $tex = str_replace('{', '\{', $tex);
+        $tex = str_replace('}', '\}', $tex);
+        return($txt);
     }
 }
 ?>
