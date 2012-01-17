@@ -23,7 +23,7 @@
    * @link       http://pear.php.net/package/Structures_BibTex
    */
 
-require_once 'PEAR.php' ;
+
 require_once 'Structures/BibTex/Exception.php';
 /**
  * Structures_BibTex
@@ -190,7 +190,8 @@ class Structures_BibTex
      * @access public
      * @param string $option option name
      * @param mixed  $value value for the option
-     * @return mixed true on success PEAR_Error on failure
+     * @return mixed true on success
+     * @throws InvalidArgumentException
      */
     function setOption($option, $value)
     {
@@ -207,7 +208,8 @@ class Structures_BibTex
      *
      * @access public
      * @param string $filename Name of the file
-     * @return mixed true on success PEAR_Error on failure
+     * @return mixed true on success
+     * @throws Structures_BibTex_Exception
      */
     function loadFile($filename)
     {
@@ -228,7 +230,8 @@ class Structures_BibTex
      * Parses what is stored in content and clears the content if the parsing is successfull.
      *
      * @access public
-     * @return boolean true on success and PEAR_Error if there was a problem
+     * @return boolean true on success
+     * @throws Structures_BibTex_Exception
      */
     function parse()
     {
@@ -758,7 +761,8 @@ class Structures_BibTex
      *
      * @access private
      * @param string $word
-     * @return int The Case or PEAR_Error if there was a problem
+     * @return int The Case
+     * @throws Structures_BibTex_Exception
      */
     function _determineCase($word) {
         $ret         = -1;
