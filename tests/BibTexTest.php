@@ -306,7 +306,7 @@ author = {John Doe and Jane Doe}
         $shouldbe[1]['author'][1]['jr']    = '';
         $this->obj->content = $teststring;
         $this->obj->parse();
-        $this->assertTrue($this->obj->data == $shouldbe);
+        $this->assertEquals($shouldbe, $this->obj->data);
     }
     /*
 	 function testWrongBraces1() {
