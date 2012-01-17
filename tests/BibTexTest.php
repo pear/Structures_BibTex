@@ -43,14 +43,20 @@ class BibTexTest extends PHPUnit_Framework_TestCase
     }
 
     public function testLoadFileFileExists() {
-        $ret = $this->obj->loadFile("BibTexTest.php");
+        $ret = $this->obj->loadFile(__FILE__);
         $this->content = ''; //Erasing the loaded content again because it is senseless
         $this->assertTrue($ret);
     }
 
     public function testLoadFileFileDoesNotExists() {
-        $ret = $this->obj->loadFile((string)time());
-        $this->assertTrue(PEAR::isError($ret));
+        try { 
+            $this->obj->loadFile((string)time());
+
+            $this->fail("Expected an exception with a faux file name");
+        } catch (Structures_BibTex_Exception $sbe) {
+            $this->assertContains("Could not find file", $sbe->getMessage());
+        }
+
     }
 
     /**
@@ -327,7 +333,13 @@ title = {Titel1},
 author = {John {Doe and {Jane Doe}
 }";
         $this->obj->content = $teststring;
-        $this->assertTrue(PEAR::isError($this->obj->parse()));
+        try {
+            $this->obj->parse();
+
+            $this->fail("Expected an exception");
+        } catch (Structures_BibTex_Exception $sbe) {
+            $this->assertContains("braces", $sbe->getMessage());
+        }
     }
 
     function testWarningAtInBraces() {
@@ -661,11 +673,25 @@ author = {John Doe and Jane Doe}
     }
     function testCaseErrorEmptyString() {
         $test = '';
-        $this->assertTrue(PEAR::isError($this->obj->_determineCase($test)));
+        try {
+            $this->obj->_determineCase($test);
+
+            $this->fail("Expected an exception");
+        } catch (Structures_BibTex_Exception $sbe) {
+            $this->assertContains("Could not determine case on word", $sbe->getMessage());
+        }
+
     }
     function testCaseErrorNonString() {
         $test = 2;
-        $this->assertTrue(PEAR::isError($this->obj->_determineCase($test)));
+        try {
+            $this->obj->_determineCase($test);
+
+            $this->fail("Expected an exception");
+        } catch (Structures_BibTex_Exception $sbe) {
+            $this->assertContains("Could not determine case on word", $sbe->getMessage());
+        }
+
     }
     
     function testAllowedTypeTrue() {
