@@ -6,7 +6,7 @@
    * A class which provides common methods to access and
    * create Strings in BibTex format
    *
-   * PHP versions 4 and 5
+   * PHP version 5
    *
    * LICENSE: This source file is subject to version 3.0 of the PHP license
    * that is available through the world-wide-web at the following URI:
@@ -24,6 +24,7 @@
    */
 
 require_once 'PEAR.php' ;
+require_once 'Structures/BibTex/Exception.php';
 /**
  * Structures_BibTex
  *
@@ -33,9 +34,6 @@ require_once 'PEAR.php' ;
  * <code>
  * $bibtex = new Structures_BibTex();
  * $ret    = $bibtex->loadFile('foo.bib');
- * if (PEAR::isError($ret)) {
- *   die($ret->getMessage());
- * }
  * $bibtex->parse();
  * print "There are ".$bibtex->amount()." entries";
  * </code>
@@ -43,9 +41,6 @@ require_once 'PEAR.php' ;
  * <code>
  * $bibtex = new Structures_BibTex();
  * $ret    = $bibtex->loadFile('bibtex.bib');
- * if (PEAR::isError($ret)) {
- *   die($ret->getMessage());
- * }
  * $bibtex->parse();
  * foreach ($bibtex->data as $entry) {
  *  print $entry['title']."<br />";
@@ -166,10 +161,7 @@ class Structures_BibTex
             'extractAuthors'    => true,
         );
         foreach ($options as $option => $value) {
-            $test = $this->setOption($option, $value);
-            if (PEAR::isError($test)) {
-                //Currently nothing is done here, but it could for example raise an warning
-            }
+            $this->setOption($option, $value);
         }
         $this->rtfstring         = 'AUTHORS, "{\b TITLE}", {\i JOURNAL}, YEAR';
         $this->htmlstring        = 'AUTHORS, "<strong>TITLE</strong>", <em>JOURNAL</em>, YEAR<br />';
@@ -206,9 +198,8 @@ class Structures_BibTex
         if (array_key_exists($option, $this->_options)) {
             $this->_options[$option] = $value;
         } else {
-            $ret = PEAR::raiseError('Unknown option '.$option);
+            throw new InvalidArgumentException('Unknown option '.$option);
         }
-        return $ret;
     }
 
     /**
@@ -222,14 +213,14 @@ class Structures_BibTex
     {
         if (file_exists($filename)) {
             if (($this->content = @file_get_contents($filename)) === false) {
-                return PEAR::raiseError('Could not open file '.$filename);
+                throw new Structures_BibTex_Exception('Could not open file '.$filename);
             } else {
                 $this->_pos    = 0;
                 $this->_oldpos = 0;
                 return true;
             }
         } else {
-            return PEAR::raiseError('Could not find file '.$filename);
+            throw new Structures_BibTex_Exception('Could not find file '.$filename);
         }
     }
 
@@ -327,7 +318,7 @@ class Structures_BibTex
             $this->content = '';
             return true;
         } else {
-            return PEAR::raiseError('Unbalanced parenthesis');
+            throw new Structures_BibTex_Exception('Unbalanced parenthesis');
         }
     }
 
@@ -651,42 +642,51 @@ class Structures_BibTex
                         if ($inlast) {
                             $last .= ' '.$tmparray[$j];
                         } elseif ($invon) {
-                            $case = $this->_determineCase($tmparray[$j]);
-                            if (PEAR::isError($case)) {
-                                // IGNORE?
-                            } elseif ((0 == $case) || (-1 == $case)) { //Change from von to last
-                                //You only change when there is no more lower case there
-                                $islast = true;
-                                for ($k=($j+1); $k<($size-1); $k++) {
-                                    $futurecase = $this->_determineCase($tmparray[$k]);
-                                    if (PEAR::isError($case)) {
-                                        // IGNORE?
-                                    } elseif (0 == $futurecase) {
-                                        $islast = false;
+                            try {
+                                $case = $this->_determineCase($tmparray[$j]);
+                            
+                                if ((0 == $case) || (-1 == $case)) { //Change from von to last
+                                    //You only change when there is no more lower case there
+                                    $islast = true;
+                                    for ($k=($j+1); $k<($size-1); $k++) {
+                                        try {
+                                            $futurecase = $this->_determineCase($tmparray[$k]);
+
+                                            if (0 == $futurecase) {
+                                                $islast = false;
+                                            }
+                                        } catch (Structures_BibTex_Exception $sbe) {
+                                            // Ignore
+                                        }
                                     }
-                                }
-                                if ($islast) {
-                                    $inlast = true;
-                                    if (-1 == $case) { //Caseless belongs to the last
-                                        $last .= ' '.$tmparray[$j];
+                                    if ($islast) {
+                                        $inlast = true;
+                                        if (-1 == $case) { //Caseless belongs to the last
+                                            $last .= ' '.$tmparray[$j];
+                                        } else {
+                                            $von  .= ' '.$tmparray[$j];
+                                        }
                                     } else {
-                                        $von  .= ' '.$tmparray[$j];
+                                        $von    .= ' '.$tmparray[$j];
                                     }
                                 } else {
-                                    $von    .= ' '.$tmparray[$j];
+                                    $von .= ' '.$tmparray[$j];
                                 }
-                            } else {
-                                $von .= ' '.$tmparray[$j];
+                            } catch (Structures_BibTex_Exception $sbe) {
+                                // Ignore
                             }
                         } else {
-                            $case = $this->_determineCase($tmparray[$j]);
-                            if (PEAR::isError($case)) {
-                                // IGNORE?
-                            } elseif (0 == $case) { //Change from first to von
-                                $invon = true;
-                                $von   .= ' '.$tmparray[$j];
-                            } else {
-                                $first .= ' '.$tmparray[$j];
+                            try {
+                                $case = $this->_determineCase($tmparray[$j]);
+
+                                if (0 == $case) { //Change from first to von
+                                    $invon = true;
+                                    $von   .= ' '.$tmparray[$j];
+                                } else {
+                                    $first .= ' '.$tmparray[$j];
+                                }
+                            } catch (Structures_BibTex_Exception $sbe) {
+                                // Ignore
                             }
                         }
                     }
@@ -711,12 +711,15 @@ class Structures_BibTex
                             if (0 != ($this->_determineCase($vonlastarray[$j]))) { //Change from von to last
                                 $islast = true;
                                 for ($k=($j+1); $k<($size-1); $k++) {
-                                    $this->_determineCase($vonlastarray[$k]);
-                                    $case = $this->_determineCase($vonlastarray[$k]);
-                                    if (PEAR::isError($case)) {
-                                        // IGNORE?
-                                    } elseif (0 == $case) {
-                                        $islast = false;
+
+                                    try {
+                                        $case = $this->_determineCase($vonlastarray[$k]);
+
+                                        if (0 == $case) {
+                                            $islast = false;
+                                        }
+                                    } catch (Structures_BibTex_Exception $sbe) {
+                                        // Ignore
                                     }
                                 }
                                 if ($islast) {
@@ -786,7 +789,7 @@ class Structures_BibTex
                 }
             }
         } else {
-            $ret = PEAR::raiseError('Could not determine case on word: '.(string)$word);
+            throw new Structures_BibTex_Exception('Could not determine case on word: '.(string)$word);
         }
         return $ret;
     }
