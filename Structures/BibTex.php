@@ -1180,7 +1180,7 @@ class Structures_BibTex
         $tex = str_replace('_', '\_', $tex);
         $tex = str_replace('{', '\{', $tex);
         $tex = str_replace('}', '\}', $tex);
-        return($txt);
+        return($tex);
     }
 }
 ?>
