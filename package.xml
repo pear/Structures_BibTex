@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.9.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.9.4" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>Structures_BibTex</name>
  <channel>pear.php.net</channel>
  <summary>Handling of BibTex Data.</summary>
@@ -10,11 +10,11 @@
   <email>elmar.pitschke@gmx.de</email>
   <active>yes</active>
  </lead>
- <date>2010-10-25</date>
- <time>20:49:21</time>
+ <date>2012-01-26</date>
+ <time>12:16:32</time>
  <version>
-  <release>1.0.0RC5</release>
-  <api>1.0.0RC4</api>
+  <release>1.0.0RC6</release>
+  <api>1.0.0RC6</api>
  </version>
  <stability>
   <release>beta</release>
@@ -23,16 +23,18 @@
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>
 QA release
-Bug #10555 	wrong entry type &quot;masterthesis&quot; -&gt; &quot;mastersthesis&quot;
-Bug #10466 	Do not use &quot;type&quot; for the entry type!
-Doc Bug #11967 	Error in the documentation example
-SVN dir layout
+Vug #14438 Regular expression for removeCurlyBraces wrong
+Bug #14442 Undefined variable $entry in _removeCurlyBraces
+Bug #15323 Multiple entries with the same cite
+Bug #16010 TeX special characters should be escaped in BibTeX exports
  </notes>
  <contents>
   <dir baseinstalldir="/" name="/">
    <file baseinstalldir="Structures/" md5sum="244bdd4c13f68602ff93bd77e1a7b419" name="docs/examples/Structures_BibTex_example.php" role="doc" />
-   <file baseinstalldir="/" md5sum="995d031aafc2918b4a06a57c281d8cb0" name="Structures/BibTex.php" role="php" />
-   <file baseinstalldir="Structures/" md5sum="d3fd78cc035102b7009c87376c3f980a" name="tests/BibTexTest.php" role="test" />
+   <file baseinstalldir="/" md5sum="ec2a96b52dfcc30f963e81eeaffc0bf4" name="Structures/BibTex.php" role="php" />
+   <file baseinstalldir="/" md5sum="999f985d139f0a2da86492bf85f98483" name="Structures/BibTex/Exception.php" role="php" />
+   <file baseinstalldir="Structures/" md5sum="80af49b95b9ed48db00ed862b13aad2f" name="tests/BibTexTest.php" role="test" />
+   <file baseinstalldir="/" md5sum="45a18b527da72355a0eca3c9efe4cb0e" name="README" role="data" />
   </dir>
  </contents>
  <dependencies>
@@ -156,6 +158,25 @@ Bug #10555 	wrong entry type &quot;masterthesis&quot; -&gt; &quot;mastersthesis&
 Bug #10466 	Do not use &quot;type&quot; for the entry type!
 Doc Bug #11967 	Error in the documentation example
 SVN dir layout
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>1.0.0RC6</release>
+    <api>1.0.0RC6</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2012-01-26</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>
+QA release
+Vug #14438 Regular expression for removeCurlyBraces wrong
+Bug #14442 Undefined variable $entry in _removeCurlyBraces
+Bug #15323 Multiple entries with the same cite
+Bug #16010 TeX special characters should be escaped in BibTeX exports
    </notes>
   </release>
  </changelog>
