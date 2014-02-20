@@ -1,0 +1,31 @@
+{
+    "authors": [
+        {
+            "email": "elmar.pitschke@gmx.de",
+            "name": "Elmar Pitschke",
+            "role": "Lead"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "Structures": "./"
+        }
+    },
+    "description": "More info available on: http://pear.php.net/package/Structures_BibTex",
+    "include-path": [
+        "./"
+    ],
+    "license": "PHP License",
+    "name": "pear/structures_bibtex",
+    "support": {
+        "issues": "http://pear.php.net/bugs/search.php?cmd=display&package_name[]=Structures_BibTex",
+        "source": "https://github.com/pear/Structures_BibTex"
+    },
+    "type": "library",
+    "require": {
+        "pear/pear_exception": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*"
+    }
+}
