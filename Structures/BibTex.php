@@ -1,41 +1,44 @@
 <?php
-  /* vim: set ts=4 sw=4: */
-  /**
-   * Class for working with BibTex data
-   *
-   * A class which provides common methods to access and
-   * create Strings in BibTex format
-   *
-   * PHP version 5
-   *
-   * LICENSE: This source file is subject to version 3.0 of the PHP license
-   * that is available through the world-wide-web at the following URI:
-   * http://www.php.net/license/3_0.txt.  If you did not receive a copy of
-   * the PHP License and are unable to obtain it through the web, please
-   * send a note to license@php.net so we can mail you a copy immediately.
-   *
-   * @category   Structures
-   * @package    Structures_BibTex
-   * @author     Elmar Pitschke <elmar.pitschke@gmx.de>
-   * @copyright  1997-2005 The PHP Group
-   * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
-   * @version    CVS: $Id: BibTex.php 322412 2012-01-17 14:25:28Z clockwerx $
-   * @link       http://pear.php.net/package/Structures_BibTex
-   */
+/* vim: set ts=4 sw=4: */
 
+/**
+ * Class for working with BibTex data
+ *
+ * A class which provides common methods to access and
+ * create Strings in BibTex format
+ *
+ * PHP version 5
+ *
+ * LICENSE: This source file is subject to version 3.0 of the PHP license
+ * that is available through the world-wide-web at the following URI:
+ * http://www.php.net/license/3_0.txt.  If you did not receive a copy of
+ * the PHP License and are unable to obtain it through the web, please
+ * send a note to license@php.net so we can mail you a copy immediately.
+ *
+ * @category   Structures
+ * @package    Structures_BibTex
+ * @author     Elmar Pitschke <elmar.pitschke@gmx.de>
+ * @copyright  1997-2005 The PHP Group
+ * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
+ * @version    CVS: $Id: BibTex.php 322412 2012-01-17 14:25:28Z clockwerx $
+ * @link       http://pear.php.net/package/Structures_BibTex
+ */
+class Structures_BibTex_Exception extends Exception
+{
+}
 
-require_once 'Structures/BibTex/Exception.php';
 /**
  * Structures_BibTex
  *
- * A class which provides common methods to access and
- * create Strings in BibTex format.
+ * A class which provides common methods to access and create Strings in
+ * BibTex format.
+ *
  * Example 1: Parsing a BibTex File and returning the number of entries
  * <code>
  * $bibtex = new Structures_BibTex();
  * $ret    = $bibtex->loadFile('foo.bib');
  * $bibtex->parse();
- * print "There are ".$bibtex->amount()." entries";
+ * print "There are ".$bibtex->number()." entries";
  * </code>
  * Example 2: Parsing a BibTex File and getting all Titles
  * <code>
@@ -134,37 +137,33 @@ class Structures_BibTex
      * @var string
      */
     var $authorstring;
-     
-    /**
-     * Constructor
-     *
-     * @access public
-     * @return void
-     */
-    function Structures_BibTex($options = array())
+
+    function __construct($options = array())
     {
-        $this->_delimiters     = array('"'=>'"',
-                                        '{'=>'}');
-        $this->data            = array();
-        $this->content         = '';
+        $this->_delimiters = array(
+            '"' => '"',
+            '{' => '}'
+        );
+        $this->data = array();
+        $this->content = '';
         //$this->_stripDelimiter = $stripDel;
         //$this->_validate       = $val;
-        $this->warnings        = array();
-        $this->_options        = array(
-            'stripDelimiter'    => true,
-            'validate'          => true,
-            'unwrap'            => false,
-            'wordWrapWidth'     => false,
-            'wordWrapBreak'     => "\n",
-            'wordWrapCut'       => 0,
+        $this->warnings = array();
+        $this->_options = array(
+            'stripDelimiter' => true,
+            'validate' => true,
+            'unwrap' => false,
+            'wordWrapWidth' => false,
+            'wordWrapBreak' => PHP_EOL,
+            'wordWrapCut' => 0,
             'removeCurlyBraces' => false,
-            'extractAuthors'    => true,
+            'extractAuthors' => true,
         );
         foreach ($options as $option => $value) {
             $this->setOption($option, $value);
         }
-        $this->rtfstring         = 'AUTHORS, "{\b TITLE}", {\i JOURNAL}, YEAR';
-        $this->htmlstring        = 'AUTHORS, "<strong>TITLE</strong>", <em>JOURNAL</em>, YEAR<br />';
+        $this->rtfstring = 'AUTHORS, "{\b TITLE}", {\i JOURNAL}, YEAR';
+        $this->htmlstring = 'AUTHORS, "<strong>TITLE</strong>", <em>JOURNAL</em>, YEAR<br />';
         $this->allowedEntryTypes = array(
             'article',
             'book',
@@ -189,18 +188,18 @@ class Structures_BibTex
      *
      * @access public
      * @param string $option option name
-     * @param mixed  $value value for the option
+     * @param mixed $value value for the option
      * @return mixed true on success
      * @throws InvalidArgumentException
      */
     function setOption($option, $value)
     {
-        $ret = true;
         if (array_key_exists($option, $this->_options)) {
             $this->_options[$option] = $value;
         } else {
             throw new InvalidArgumentException('Unknown option '.$option);
         }
+        return true;
     }
 
     /**
@@ -217,7 +216,7 @@ class Structures_BibTex
             if (($this->content = @file_get_contents($filename)) === false) {
                 throw new Structures_BibTex_Exception('Could not open file '.$filename);
             } else {
-                $this->_pos    = 0;
+                $this->_pos = 0;
                 $this->_oldpos = 0;
                 return true;
             }
@@ -233,25 +232,28 @@ class Structures_BibTex
      * @return boolean true on success
      * @throws Structures_BibTex_Exception
      */
-    function parse()
+    function parse($content = NULL)
     {
-        //The amount of opening braces is compared to the amount of closing braces
-        //Braces inside comments are ignored
+        if ($content !== NULL) {
+            $this->content = $content;
+        }
+
+        // The number of opening braces is compared to the number of closing braces
+        // Braces inside comments are ignored.
         $this->warnings = array();
-        $this->data     = array();
-        $valid          = true;
-        $open           = 0;
-        $entry          = false;
-        $char           = '';
-        $lastchar       = '';
-        $buffer         = '';
+        $this->data = array();
+        $valid = true;
+        $open = 0;
+        $entry = false;
+        $lastchar = '';
+        $buffer = '';
         for ($i = 0; $i < strlen($this->content); $i++) {
             $char = substr($this->content, $i, 1);
             if ((0 != $open) && ('@' == $char)) {
                 if (!$this->_checkAt($buffer)) {
                     $this->_generateWarning('WARNING_MISSING_END_BRACE', '', $buffer);
-                    //To correct the data we need to insert a closing brace
-                    $char     = '}';
+                    // To correct the data we need to insert a closing brace
+                    $char = '}';
                     $i--;
                 }
             }
@@ -265,7 +267,7 @@ class Structures_BibTex
                     $valid = false;
                 }
                 if (0 == $open) { //End of entry
-                    $entry     = false;
+                    $entry = false;
                     $entrydata = $this->_parseEntry($buffer);
                     if (!$entrydata) {
                         /**
@@ -285,22 +287,21 @@ class Structures_BibTex
             }
             $lastchar = $char;
         }
-        //If open is one it may be possible that the last ending brace is missing
+        // If open is one it may be possible that the last ending brace is missing
         if (1 == $open) {
             $entrydata = $this->_parseEntry($buffer);
             if (!$entrydata) {
                 $valid = false;
             } else {
                 $this->data[] = $entrydata;
-                $buffer = '';
-                $open   = 0;
+                $open = 0;
             }
         }
-        //At this point the open should be zero
+        // At this point the open should be zero
         if (0 != $open) {
             $valid = false;
         }
-        //Are there Multiple entries with the same cite?
+        // Are there Multiple entries with the same cite?
         if ($this->_options['validate']) {
             $cites = array();
             foreach ($this->data as $entry) {
@@ -314,7 +315,7 @@ class Structures_BibTex
                         $notuniques[] = $cites[$i];
                     }
                 }
-                $this->_generateWarning('WARNING_MULTIPLE_ENTRIES', implode(',',$notuniques));
+                $this->_generateWarning('WARNING_MULTIPLE_ENTRIES', implode(',', $notuniques));
             }
         }
         if ($valid) {
@@ -323,6 +324,17 @@ class Structures_BibTex
         } else {
             throw new Structures_BibTex_Exception('Unbalanced parenthesis');
         }
+    }
+
+    /**
+     * Return the accumulated entries as a key-value array.
+     *
+     * @access public
+     * @return array
+     */
+    function entries()
+    {
+        return $this->data;
     }
 
     /**
@@ -345,30 +357,30 @@ class Structures_BibTex
      * @param string $entry The entry
      * @return array The representation of the entry or false if there is a problem
      */
-    function _parseEntry($entry)
+    protected function _parseEntry($entry)
     {
         $entrycopy = '';
         if ($this->_options['validate']) {
             $entrycopy = $entry; //We need a copy for printing the warnings
         }
         $ret = array();
-        if ('@string' ==  strtolower(substr($entry, 0, 7))) {
+        if ('@string' == strtolower(substr($entry, 0, 7))) {
             //String are not yet supported!
             if ($this->_options['validate']) {
                 $this->_generateWarning('STRING_ENTRY_NOT_YET_SUPPORTED', '', $entry.'}');
             }
-        } elseif ('@preamble' ==  strtolower(substr($entry, 0, 9))) {
+        } elseif ('@preamble' == strtolower(substr($entry, 0, 9))) {
             //Preamble not yet supported!
             if ($this->_options['validate']) {
                 $this->_generateWarning('PREAMBLE_ENTRY_NOT_YET_SUPPORTED', '', $entry.'}');
             }
         } else {
             //Parsing all fields
-            while (strrpos($entry,'=') !== false) {
+            while (strrpos($entry, '=') !== false) {
                 $position = strrpos($entry, '=');
                 //Checking that the equal sign is not quoted or is not inside a equation (For example in an abstract)
-                $proceed  = true;
-                if (substr($entry, $position-1, 1) == '\\') {
+                $proceed = true;
+                if (substr($entry, $position - 1, 1) == '\\') {
                     $proceed = false;
                 }
                 if ($proceed) {
@@ -376,9 +388,9 @@ class Structures_BibTex
                 }
                 while (!$proceed) {
                     $substring = substr($entry, 0, $position);
-                    $position  = strrpos($substring,'=');
-                    $proceed   = true;
-                    if (substr($entry, $position-1, 1) == '\\') {
+                    $position = strrpos($substring, '=');
+                    $proceed = true;
+                    if (substr($entry, $position - 1, 1) == '\\') {
                         $proceed = false;
                     }
                     if ($proceed) {
@@ -386,10 +398,10 @@ class Structures_BibTex
                     }
                 }
 
-                $value = trim(substr($entry, $position+1));
+                $value = trim(substr($entry, $position + 1));
                 $entry = substr($entry, 0, $position);
 
-                if (',' == substr($value, strlen($value)-1, 1)) {
+                if (',' == substr($value, strlen($value) - 1, 1)) {
                     $value = substr($value, 0, -1);
                 }
                 if ($this->_options['validate']) {
@@ -404,10 +416,10 @@ class Structures_BibTex
                 if ($this->_options['removeCurlyBraces']) {
                     $value = $this->_removeCurlyBraces($value);
                 }
-                $position    = strrpos($entry, ',');
-                $field       = strtolower(trim(substr($entry, $position+1)));
+                $position = strrpos($entry, ',');
+                $field = strtolower(trim(substr($entry, $position + 1)));
                 $ret[$field] = $value;
-                $entry       = substr($entry, 0, $position);
+                $entry = substr($entry, 0, $position);
             }
             //Parsing cite and entry type
             $arr = explode('{', $entry);
@@ -438,20 +450,21 @@ class Structures_BibTex
      *
      * @access private
      * @param string $entry The text of the whole remaining entry
-     * @param int the current used place of the '='
-     * @return bool true if the '=' is correct, false if it contains to an equation
+     * @param int $position The current used place of the '='
+     * @return bool True if the '=' is correct, false if it contains to an equation
      */
-    function _checkEqualSign($entry, $position)
+    protected function _checkEqualSign($entry, $position)
     {
         $ret = true;
-        //This is getting tricky
-        //We check the string backwards until the position and count the closing an opening braces
-        //If we reach the position the amount of opening and closing braces should be equal
+        // This is getting tricky.
+        // We check the string backwards until the position and count the closing an
+        // opening braces. If we reach the position the number of opening and
+        // closing braces should be equal.
         $length = strlen($entry);
-        $open   = 0;
-        for ($i = $length-1; $i >= $position; $i--) {
-            $precedingchar = substr($entry, $i-1, 1);
-            $char          = substr($entry, $i, 1);
+        $open = 0;
+        for ($i = $length - 1; $i >= $position; $i--) {
+            $precedingchar = substr($entry, $i - 1, 1);
+            $char = substr($entry, $i, 1);
             if (('{' == $char) && ('\\' != $precedingchar)) {
                 $open++;
             }
@@ -462,23 +475,25 @@ class Structures_BibTex
         if (0 != $open) {
             $ret = false;
         }
-        //There is still the posibility that the entry is delimited by double quotes.
-        //Then it is possible that the braces are equal even if the '=' is in an equation.
+        // There is still the possibility that the entry is delimited by double
+        // quotes. Then it is possible that the braces are equal even if the '=' is
+        // in an equation.
         if ($ret) {
             $entrycopy = trim($entry);
-            $lastchar  = $entrycopy{strlen($entrycopy)-1};
+            $lastchar = $entrycopy{strlen($entrycopy) - 1};
             if (',' == $lastchar) {
-                $lastchar = $entrycopy{strlen($entrycopy)-2};
+                $lastchar = $entrycopy{strlen($entrycopy) - 2};
             }
             if ('"' == $lastchar) {
-                //The return value is set to false
-                //If we find the closing " before the '=' it is set to true again.
-                //Remember we begin to search the entry backwards so the " has to show up twice - ending and beginning delimiter
+                // The return value is set to false. If we find the closing " before the
+                // '=' it is set to true again. Remember we begin to search the entry
+                // backwards so the " has to show up twice - ending and beginning
+                // delimiter.
                 $ret = false;
                 $found = 0;
                 for ($i = $length; $i >= $position; $i--) {
-                    $precedingchar = substr($entry, $i-1, 1);
-                    $char          = substr($entry, $i, 1);
+                    $precedingchar = substr($entry, $i - 1, 1);
+                    $char = substr($entry, $i, 1);
                     if (('"' == $char) && ('\\' != $precedingchar)) {
                         $found++;
                     }
@@ -503,7 +518,7 @@ class Structures_BibTex
     {
         return in_array($entry, $this->allowedEntryTypes);
     }
-    
+
     /**
      * Checking whether an at is outside an entry
      *
@@ -517,27 +532,26 @@ class Structures_BibTex
      */
     function _checkAt($entry)
     {
-        $ret     = false;
+        $ret = false;
         $opening = array_keys($this->_delimiters);
         $closing = array_values($this->_delimiters);
         //Getting the value (at is only allowd in values)
-        if (strrpos($entry,'=') !== false) {
+        if (strrpos($entry, '=') !== false) {
             $position = strrpos($entry, '=');
-            $proceed  = true;
-            if (substr($entry, $position-1, 1) == '\\') {
+            $proceed = true;
+            if (substr($entry, $position - 1, 1) == '\\') {
                 $proceed = false;
             }
             while (!$proceed) {
                 $substring = substr($entry, 0, $position);
-                $position  = strrpos($substring,'=');
-                $proceed   = true;
-                if (substr($entry, $position-1, 1) == '\\') {
+                $position = strrpos($substring, '=');
+                $proceed = true;
+                if (substr($entry, $position - 1, 1) == '\\') {
                     $proceed = false;
                 }
             }
-            $value    = trim(substr($entry, $position+1));
-            $open     = 0;
-            $char     = '';
+            $value = trim(substr($entry, $position + 1));
+            $open = 0;
             $lastchar = '';
             for ($i = 0; $i < strlen($value); $i++) {
                 $char = substr($this->content, $i, 1);
@@ -549,7 +563,7 @@ class Structures_BibTex
                 $lastchar = $char;
             }
             //if open is grater zero were are inside an entry
-            if ($open>0) {
+            if ($open > 0) {
                 $ret = true;
             }
         }
@@ -566,9 +580,8 @@ class Structures_BibTex
     function _stripDelimiter($entry)
     {
         $beginningdels = array_keys($this->_delimiters);
-        $length        = strlen($entry);
-        $firstchar     = substr($entry, 0, 1);
-        $lastchar      = substr($entry, -1, 1);
+        $firstchar = substr($entry, 0, 1);
+        $lastchar = substr($entry, -1, 1);
         while (in_array($firstchar, $beginningdels)) { //The first character is an opening delimiter
             if ($lastchar == $this->_delimiters[$firstchar]) { //Matches to closing Delimiter
                 $entry = substr($entry, 1, -1);
@@ -576,7 +589,7 @@ class Structures_BibTex
                 break;
             }
             $firstchar = substr($entry, 0, 1);
-            $lastchar  = substr($entry, -1, 1);
+            $lastchar = substr($entry, -1, 1);
         }
         return $entry;
     }
@@ -603,8 +616,11 @@ class Structures_BibTex
      */
     function _wordwrap($entry)
     {
-        if ( (''!=$entry) && (is_string($entry)) ) {
-            $entry = wordwrap($entry, $this->_options['wordWrapWidth'], $this->_options['wordWrapBreak'], $this->_options['wordWrapCut']);
+        if (('' != $entry) && (is_string($entry))) {
+            $entry = wordwrap($entry,
+                              $this->_options['wordWrapWidth'],
+                              $this->_options['wordWrapBreak'],
+                              $this->_options['wordWrapCut']);
         }
         return $entry;
     }
@@ -616,66 +632,68 @@ class Structures_BibTex
      * @param string $entry The entry with the authors
      * @return array the extracted authors
      */
-    function _extractAuthors($entry) {
-        $entry       = $this->_unwrap($entry);
-        $authorarray = array();
+    function _extractAuthors($entry)
+    {
+        $entry = $this->_unwrap($entry);
         $authorarray = explode(' and ', $entry);
         for ($i = 0; $i < sizeof($authorarray); $i++) {
             $author = trim($authorarray[$i]);
             /*The first version of how an author could be written (First von Last)
              has no commas in it*/
-            $first    = '';
-            $von      = '';
-            $last     = '';
-            $jr       = '';
+            $first = '';
+            $von = '';
+            $last = '';
+            $jr = '';
             if (strpos($author, ',') === false) {
-                $tmparray = array();
                 $tmparray = preg_split('/[\s\~]/', $author);
 
-                $size     = sizeof($tmparray);
+                $size = sizeof($tmparray);
                 if (1 == $size) { //There is only a last
                     $last = $tmparray[0];
                 } elseif (2 == $size) { //There is a first and a last
                     $first = $tmparray[0];
-                    $last  = $tmparray[1];
+                    $last = $tmparray[1];
                 } else {
-                    $invon  = false;
+                    $invon = false;
                     $inlast = false;
-                    for ($j=0; $j<($size-1); $j++) {
+                    for ($j = 0; $j < ($size - 1); $j++) {
                         if ($inlast) {
                             $last .= ' '.$tmparray[$j];
                         } elseif ($invon) {
                             try {
                                 $case = $this->_determineCase($tmparray[$j]);
-                            
-                                if ((0 == $case) || (-1 == $case)) { //Change from von to last
-                                    //You only change when there is no more lower case there
+
+                                if ((0 == $case) || (-1 == $case)) {
+                                    // Change from von to last. You only change
+                                    // when there is no more lower case there.
                                     $islast = true;
-                                    for ($k=($j+1); $k<($size-1); $k++) {
+                                    for ($k = ($j + 1); $k < ($size - 1); $k++) {
                                         try {
                                             $futurecase = $this->_determineCase($tmparray[$k]);
 
                                             if (0 == $futurecase) {
                                                 $islast = false;
                                             }
-                                        } catch (Structures_BibTex_Exception $sbe) {
+                                        }
+                                        catch (Structures_BibTex_Exception $sbe) {
                                             // Ignore
                                         }
                                     }
                                     if ($islast) {
                                         $inlast = true;
-                                        if (-1 == $case) { //Caseless belongs to the last
+                                        if (-1 == $case) { // Caseless belongs to the last
                                             $last .= ' '.$tmparray[$j];
                                         } else {
-                                            $von  .= ' '.$tmparray[$j];
+                                            $von .= ' '.$tmparray[$j];
                                         }
                                     } else {
-                                        $von    .= ' '.$tmparray[$j];
+                                        $von .= ' '.$tmparray[$j];
                                     }
                                 } else {
                                     $von .= ' '.$tmparray[$j];
                                 }
-                            } catch (Structures_BibTex_Exception $sbe) {
+                            }
+                            catch (Structures_BibTex_Exception $sbe) {
                                 // Ignore
                             }
                         } else {
@@ -684,36 +702,35 @@ class Structures_BibTex
 
                                 if (0 == $case) { //Change from first to von
                                     $invon = true;
-                                    $von   .= ' '.$tmparray[$j];
+                                    $von .= ' '.$tmparray[$j];
                                 } else {
                                     $first .= ' '.$tmparray[$j];
                                 }
-                            } catch (Structures_BibTex_Exception $sbe) {
+                            }
+                            catch (Structures_BibTex_Exception $sbe) {
                                 // Ignore
                             }
                         }
                     }
                     //The last entry is always the last!
-                    $last .= ' '.$tmparray[$size-1];
+                    $last .= ' '.$tmparray[$size - 1];
                 }
             } else { //Version 2 and 3
-                $tmparray     = array();
-                $tmparray     = explode(',', $author);
+                $tmparray = explode(',', $author);
                 //The first entry must contain von and last
-                $vonlastarray = array();
                 $vonlastarray = explode(' ', $tmparray[0]);
-                $size         = sizeof($vonlastarray);
-                if (1==$size) { //Only one entry->got to be the last
+                $size = sizeof($vonlastarray);
+                if (1 == $size) { //Only one entry->got to be the last
                     $last = $vonlastarray[0];
                 } else {
                     $inlast = false;
-                    for ($j=0; $j<($size-1); $j++) {
+                    for ($j = 0; $j < ($size - 1); $j++) {
                         if ($inlast) {
                             $last .= ' '.$vonlastarray[$j];
                         } else {
                             if (0 != ($this->_determineCase($vonlastarray[$j]))) { //Change from von to last
                                 $islast = true;
-                                for ($k=($j+1); $k<($size-1); $k++) {
+                                for ($k = ($j + 1); $k < ($size - 1); $k++) {
 
                                     try {
                                         $case = $this->_determineCase($vonlastarray[$k]);
@@ -721,31 +738,37 @@ class Structures_BibTex
                                         if (0 == $case) {
                                             $islast = false;
                                         }
-                                    } catch (Structures_BibTex_Exception $sbe) {
+                                    }
+                                    catch (Structures_BibTex_Exception $sbe) {
                                         // Ignore
                                     }
                                 }
                                 if ($islast) {
                                     $inlast = true;
-                                    $last   .= ' '.$vonlastarray[$j];
+                                    $last .= ' '.$vonlastarray[$j];
                                 } else {
-                                    $von    .= ' '.$vonlastarray[$j];
+                                    $von .= ' '.$vonlastarray[$j];
                                 }
                             } else {
-                                $von    .= ' '.$vonlastarray[$j];
+                                $von .= ' '.$vonlastarray[$j];
                             }
                         }
                     }
-                    $last .= ' '.$vonlastarray[$size-1];
+                    $last .= ' '.$vonlastarray[$size - 1];
                 }
                 //Now we check if it is version three (three entries in the array (two commas)
-                if (3==sizeof($tmparray)) {
+                if (3 == sizeof($tmparray)) {
                     $jr = $tmparray[1];
                 }
                 //Everything in the last entry is first
-                $first = $tmparray[sizeof($tmparray)-1];
+                $first = $tmparray[sizeof($tmparray) - 1];
             }
-            $authorarray[$i] = array('first'=>trim($first), 'von'=>trim($von), 'last'=>trim($last), 'jr'=>trim($jr));
+            $authorarray[$i] = array(
+                'first' => trim($first),
+                'von' => trim($von),
+                'last' => trim($last),
+                'jr' => trim($jr)
+            );
         }
         return $authorarray;
     }
@@ -764,36 +787,39 @@ class Structures_BibTex
      * @return int The Case
      * @throws Structures_BibTex_Exception
      */
-    function _determineCase($word) {
-        $ret         = -1;
-        $trimmedword = trim ($word);
-        /*We need this variable. Without the next of would not work
-         (trim changes the variable automatically to a string!)*/
+    function _determineCase($word)
+    {
+        $ret = -1;
+        $trimmedword = trim($word);
+        /*
+         * We need this variable. Without the next of would not work (trim changes
+         * the variable automatically to a string!)
+         */
         if (is_string($word) && (strlen($trimmedword) > 0)) {
-            $i         = 0;
-            $found     = false;
+            $i = 0;
+            $found = false;
             $openbrace = 0;
             while (!$found && ($i <= strlen($word))) {
                 $letter = substr($trimmedword, $i, 1);
-                $ord    = ord($letter);
-                if ($ord == 123) { //Open brace
+                $ord = ord($letter);
+                if ($ord == 123) { // Open brace
                     $openbrace++;
                 }
-                if ($ord == 125) { //Closing brace
+                if ($ord == 125) { // Closing brace
                     $openbrace--;
                 }
-                if (($ord>=65) && ($ord<=90) && (0==$openbrace)) { //The first character is uppercase
-                    $ret   = 1;
+                if (($ord >= 65) && ($ord <= 90) && (0 == $openbrace)) { //The first character is uppercase
+                    $ret = 1;
                     $found = true;
-                } elseif ( ($ord>=97) && ($ord<=122) && (0==$openbrace) ) { //The first character is lowercase
-                    $ret   = 0;
+                } elseif (($ord >= 97) && ($ord <= 122) && (0 == $openbrace)) { //The first character is lowercase
+                    $ret = 0;
                     $found = true;
-                } else { //Not yet found
+                } else { // Not yet found
                     $i++;
                 }
             }
         } else {
-            throw new Structures_BibTex_Exception('Could not determine case on word: '.(string)$word);
+            throw new Structures_BibTex_Exception('Could not determine case on word: '.(string) $word);
         }
         return $ret;
     }
@@ -812,18 +838,17 @@ class Structures_BibTex
      */
     function _validateValue($entry, $wholeentry)
     {
-        //There is no @ allowed if the entry is enclosed by braces
+        // There is no @ allowed if the entry is enclosed by braces.
         if (preg_match('/^{.*@.*}$/', $entry)) {
             $this->_generateWarning('WARNING_AT_IN_BRACES', $entry, $wholeentry);
         }
-        //No escaped " allowed if the entry is enclosed by double quotes
+        // No escaped " allowed if the entry is enclosed by double quotes.
         if (preg_match('/^\".*\\".*\"$/', $entry)) {
             $this->_generateWarning('WARNING_ESCAPED_DOUBLE_QUOTE_INSIDE_DOUBLE_QUOTES', $entry, $wholeentry);
         }
-        //Amount of Braces is not correct
-        $open     = 0;
+        // Number of Braces is not correct.
+        $open = 0;
         $lastchar = '';
-        $char     = '';
         for ($i = 0; $i < strlen($entry); $i++) {
             $char = substr($entry, $i, 1);
             if (('{' == $char) && ('\\' != $lastchar)) {
@@ -835,7 +860,7 @@ class Structures_BibTex
             $lastchar = $char;
         }
         if (0 != $open) {
-            $this->_generateWarning('WARNING_UNBALANCED_AMOUNT_OF_BRACES', $entry, $wholeentry);
+            $this->_generateWarning('WARNING_UNBALANCED_number_OF_BRACES', $entry, $wholeentry);
         }
     }
 
@@ -843,37 +868,40 @@ class Structures_BibTex
      * Remove curly braces from entry
      *
      * @access private
-     * @param string $value The value in which curly braces to be removed
-     * @param string Value with removed curly braces
+     * @param string $value
+     *   The value in which curly braces to be removed.
+     *
+     * @return string
+     *   The new value.
      */
-    function _removeCurlyBraces($value)
+    protected function _removeCurlyBraces($value)
     {
-        //First we save the delimiters
+        // First we save the delimiters.
         $beginningdels = array_keys($this->_delimiters);
-        $firstchar     = substr($value, 0, 1);
-        $lastchar      = substr($value, -1, 1);
-        $begin         = '';
-        $end           = '';
+        $firstchar = substr($value, 0, 1);
+        $lastchar = substr($value, -1, 1);
+        $begin = '';
+        $end = '';
         while (in_array($firstchar, $beginningdels)) { //The first character is an opening delimiter
             if ($lastchar == $this->_delimiters[$firstchar]) { //Matches to closing Delimiter
                 $begin .= $firstchar;
-                $end   .= $lastchar;
-                $value  = substr($value, 1, -1);
+                $end .= $lastchar;
+                $value = substr($value, 1, -1);
             } else {
                 break;
             }
             $firstchar = substr($value, 0, 1);
-            $lastchar  = substr($value, -1, 1);
+            $lastchar = substr($value, -1, 1);
         }
-        //Now we get rid of the curly braces
-        $pattern     = '/([^\\\\]|^)?\{(.*?[^\\\\])\}/';
+        // Now we get rid of the curly braces.
+        $pattern = '/([^\\\\]|^)?\{(.*?[^\\\\])\}/';
         $replacement = '$1$2';
-        $value       = preg_replace($pattern, $replacement, $value);
-        //Reattach delimiters
-        $value       = $begin.$value.$end;
+        $value = preg_replace($pattern, $replacement, $value);
+        // Reattach delimiters.
+        $value = $begin.$value.$end;
         return $value;
     }
-    
+
     /**
      * Generates a warning
      *
@@ -882,12 +910,12 @@ class Structures_BibTex
      * @param string $entry The line of the entry where the warning occurred
      * @param string $wholeentry OPTIONAL The whole entry where the warning occurred
      */
-    function _generateWarning($type, $entry, $wholeentry='')
+    protected function _generateWarning($type, $entry, $wholeentry = '')
     {
-        $warning['warning']    = $type;
-        $warning['entry']      = $entry;
+        $warning['warning'] = $type;
+        $warning['entry'] = $entry;
         $warning['wholeentry'] = $wholeentry;
-        $this->warnings[]      = $warning;
+        $this->warnings[] = $warning;
     }
 
     /**
@@ -908,21 +936,24 @@ class Structures_BibTex
      */
     function hasWarning()
     {
-        if (sizeof($this->warnings)>0) return true;
-        else return false;
+        if (sizeof($this->warnings) > 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
-     * Returns the amount of available BibTex entries
+     * Returns the number of available BibTex entries
      *
      * @access public
-     * @return int The amount of available BibTex entries
+     * @return int The number of available BibTex entries
      */
-    function amount()
+    function number()
     {
         return sizeof($this->data);
     }
-    
+
     /**
      * Returns the author formatted
      *
@@ -932,7 +963,7 @@ class Structures_BibTex
      * @param array $array Author array
      * @return string the formatted author string
      */
-    function _formatAuthor($array)
+    protected function _formatAuthor($array)
     {
         if (!array_key_exists('von', $array)) {
             $array['von'] = '';
@@ -977,11 +1008,11 @@ class Structures_BibTex
             //Intro
             $bibtex .= '@'.strtolower($entry['entryType']).' { '.$entry['cite'].",\n";
             //Other fields except author
-            foreach ($entry as $key=>$val) {
-                if ($this->_options['wordWrapWidth']>0) {
+            foreach ($entry as $key => $val) {
+                if ($this->_options['wordWrapWidth'] > 0) {
                     $val = $this->_wordWrap($val);
                 }
-                if (!in_array($key, array('cite','entryType','author'))) {
+                if (!in_array($key, array('cite', 'entryType', 'author'))) {
                     $bibtex .= "\t".$key.' = {'.$this->_escape_tex($val)."},\n";
                 }
             }
@@ -1000,7 +1031,7 @@ class Structures_BibTex
                 $author = '';
             }
             $bibtex .= "\tauthor = {".$this->_escape_tex($author)."}\n";
-            $bibtex.="}\n\n";
+            $bibtex .= "}\n";
         }
         return $bibtex;
     }
@@ -1010,7 +1041,6 @@ class Structures_BibTex
      *
      * @access public
      * @param array $newentry The new data to add
-     * @return void
      */
     function addEntry($newentry)
     {
@@ -1021,7 +1051,7 @@ class Structures_BibTex
      * Returns statistic
      *
      * This functions returns a hash table. The keys are the different
-     * entry types and the values are the amount of these entries.
+     * entry types and the values are the number of these entries.
      *
      * @access public
      * @return array Hash Table with the data
@@ -1038,7 +1068,7 @@ class Structures_BibTex
         }
         return $ret;
     }
-    
+
     /**
      * Returns the stored data in RTF format
      *
@@ -1051,16 +1081,17 @@ class Structures_BibTex
      * "rtfstring". This variable is used and the placeholders simply replaced.
      * Lines with no data cause an warning!
      *
+     * @access public
      * @return string the RTF Strings
      */
     function rtf()
     {
         $ret = "{\\rtf\n";
         foreach ($this->data as $entry) {
-            $line    = $this->rtfstring;
-            $title   = '';
+            $line = $this->rtfstring;
+            $title = '';
             $journal = '';
-            $year    = '';
+            $year = '';
             $authors = '';
             if (array_key_exists('title', $entry)) {
                 $title = $this->_unwrap($entry['title']);
@@ -1082,15 +1113,15 @@ class Structures_BibTex
                     $authors = $entry['author'];
                 }
             }
-            if ((''!=$title) || (''!=$journal) || (''!=$year) || (''!=$authors)) {
+            if (('' != $title) || ('' != $journal) || ('' != $year) || ('' != $authors)) {
                 $line = str_replace("TITLE", $title, $line);
                 $line = str_replace("JOURNAL", $journal, $line);
                 $line = str_replace("YEAR", $year, $line);
                 $line = str_replace("AUTHORS", $authors, $line);
                 $line .= "\n\\par\n";
-                $ret  .= $line;
+                $ret .= $line;
             } else {
-                $this->_generateWarning('WARNING_LINE_WAS_NOT_CONVERTED', '', print_r($entry,1));
+                $this->_generateWarning('WARNING_LINE_WAS_NOT_CONVERTED', '', print_r($entry, 1));
             }
         }
         $ret .= '}';
@@ -1108,16 +1139,17 @@ class Structures_BibTex
      * simply replaced.
      * Lines with no data cause an warning!
      *
+     * @access public
      * @return string the HTML Strings
      */
     function html()
     {
-        $ret = "<p>\n";
+        $ret = "<p>".PHP_EOL;
         foreach ($this->data as $entry) {
-            $line    = $this->htmlstring;
-            $title   = '';
+            $line = $this->htmlstring;
+            $title = '';
             $journal = '';
-            $year    = '';
+            $year = '';
             $authors = '';
             if (array_key_exists('title', $entry)) {
                 $title = $this->_unwrap($entry['title']);
@@ -1139,37 +1171,39 @@ class Structures_BibTex
                     $authors = $entry['author'];
                 }
             }
-            if ((''!=$title) || (''!=$journal) || (''!=$year) || (''!=$authors)) {
+            if (('' != $title) || ('' != $journal) || ('' != $year) || ('' != $authors)) {
                 $line = str_replace("TITLE", $title, $line);
                 $line = str_replace("JOURNAL", $journal, $line);
                 $line = str_replace("YEAR", $year, $line);
                 $line = str_replace("AUTHORS", $authors, $line);
-                $line .= "\n";
-                $ret  .= $line;
+                $line .= PHP_EOL;
+                $ret .= $line;
             } else {
-                $this->_generateWarning('WARNING_LINE_WAS_NOT_CONVERTED', '', print_r($entry,1));
+                $this->_generateWarning('WARNING_LINE_WAS_NOT_CONVERTED', '', print_r($entry, 1));
             }
         }
-        $ret .= "</p>\n";
+        $ret .= "</p>".PHP_EOL;
         return $ret;
     }
-    
+
     /**
      * Returns a string with special TeX characters escaped.
      *
-     * This method is to be used with any method which is exporting TeX, such 
-     * as the bibTex method. A series of string replace operations are 
+     * This method is to be used with any method which is exporting TeX, such
+     * as the bibTex method. A series of string replace operations are
      * performed on the input string, and the escaped string is returned.
-     * 
+     *
      * This code is taken from the Text_Wiki Pear package.
-     * 
+     *
      * @author Jeremy Cowgar <jeremy@cowgar.com>
-     * 
+     *
      * @access private
-     * @param string $txt the TeX string
+     * @param string $tex
+     *   The TeX string
+     *
      * @return string the escaped TeX string
      */
-    function _escape_tex($tex)
+    protected function _escape_tex($tex)
     {
         $tex = str_replace("\\", "\\\\", $tex);
         $tex = str_replace('#', '\#', $tex);
@@ -1180,7 +1214,37 @@ class Structures_BibTex
         $tex = str_replace('_', '\_', $tex);
         $tex = str_replace('{', '\{', $tex);
         $tex = str_replace('}', '\}', $tex);
-        return($tex);
+        return ($tex);
+    }
+
+    /**
+     * Map a TeX character sequence to an html entity within a string.
+     *
+     * @author Ruth Ivimey-Cook <ruth@ivimey.org>
+     *
+     * @access public
+     * @param string|array $str
+     *   The TeX character sequence.
+     * @return string|array
+     *   The html-entity string.
+     */
+    function texchar_to_html_entity($str)
+    {
+        $table = array(
+            '{\\O}' => '&Oslash;',
+            '{\\o}' => '&oslash;',
+            '{\\~([aeionAEION])}' => '&$1tilde;',
+            '{\\\^([aeiouAEIOU])}' => '&$1circ;',
+            '{\\`([aeiouyAEIOUY])}' => '&$1grave;',
+            '{\\\'([aeiouyAEIOUY])}' => '&$1acute;',
+            '{\\"([aeiouyAEIOUY])}' => '&$1uml;',
+            '\\~{([aeionAEION])}' => '&$1tilde;',
+            '\\\^{([aeiouAEIOU])}' => '&$1circ;',
+            '\\`{([aeiouyAEIOUY])}' => '&$1grave;',
+            '\\\'{([aeiouyAEIOUY])}' => '&$1acute;',
+            '\\"{([aeiouyAEIOUY])}' => '&$1uml;',
+        );
+
+        return preg_replace(array_keys($table), $table, $str);
     }
 }
-?>
