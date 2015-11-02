@@ -1,16 +1,92 @@
 <?php
-  // Call Structures_BibTexTest::main() if this source file is executed directly.
+// Call Structures_BibTexTest::main() if this source file is executed directly.
 if (!defined("PHPUnit_MAIN_METHOD")) {
     define("PHPUnit_MAIN_METHOD", "BibTexTest::main");
- }
-
-require_once "PHPUnit/Framework/TestCase.php";
-require_once "PHPUnit/Framework/TestSuite.php";
-
-// You may remove the following line when all tests have been implemented.
-require_once "PHPUnit/Framework/IncompleteTestError.php";
+}
 
 require_once "Structures/BibTex.php";
+
+/**
+ * Class Testable_Structures_BibTex
+ *
+ * Exists purely to expose protected methods of the class to testing.
+ */
+class Testable_Structures_BibTex extends Structures_BibTex {
+    function __construct($options = array())
+    {
+        parent::__construct($options);
+    }
+
+    public function _parseEntry($entry)
+    {
+        return parent::_parseEntry($entry);
+    }
+
+    public function _checkEqualSign($entry, $position)
+    {
+        return parent::_checkEqualSign($entry, $position);
+    }
+
+    public function _checkAllowedEntryType($entry)
+    {
+        return parent::_checkAllowedEntryType($entry);
+    }
+
+    public function _checkAt($entry)
+    {
+        return parent::_checkAt($entry);
+    }
+
+    public function _stripDelimiter($entry)
+    {
+        return parent::_stripDelimiter($entry);
+    }
+
+    public function _unwrap($entry)
+    {
+        return parent::_unwrap($entry);
+    }
+
+    public function _wordwrap($entry)
+    {
+        return parent::_wordwrap($entry);
+    }
+
+    public function _extractAuthors($entry)
+    {
+        return parent::_extractAuthors($entry);
+    }
+
+    public function _determineCase($word)
+    {
+        return parent::_determineCase($word);
+    }
+
+    public function _validateValue($entry, $wholeentry)
+    {
+        parent::_validateValue($entry, $wholeentry);
+    }
+
+    public function _removeCurlyBraces($value)
+    {
+        return parent::_removeCurlyBraces($value);
+    }
+
+    public function _generateWarning($type, $entry, $wholeentry = '')
+    {
+        parent::_generateWarning($type, $entry, $wholeentry);
+    }
+
+    public function _formatAuthor($array)
+    {
+        return parent::_formatAuthor($array);
+    }
+
+    public function _escape_tex($tex)
+    {
+        return parent::_escape_tex($tex);
+    }
+}
 
 /**
  * Test class for Structures_BibTex.
@@ -18,8 +94,8 @@ require_once "Structures/BibTex.php";
  */
 class BibTexTest extends PHPUnit_Framework_TestCase
 {
+    /** @var Testable_Structures_BibTex $obj */
     var $obj;
-
 
     /**
      * Sets up the fixture, for example, open a network connection.
@@ -27,8 +103,9 @@ class BibTexTest extends PHPUnit_Framework_TestCase
      *
      * @access protected
      */
-    protected function setUp() {
-        $this->obj = new Structures_BibTex();
+    protected function setUp()
+    {
+        $this->obj = new Testable_Structures_BibTex();
     }
 
     /**
@@ -37,22 +114,26 @@ class BibTexTest extends PHPUnit_Framework_TestCase
      *
      * @access protected
      */
-    protected function tearDown() {
+    protected function tearDown()
+    {
         unset($this->obj);
     }
 
-    public function testLoadFileFileExists() {
+    public function testLoadFileFileExists()
+    {
         $ret = $this->obj->loadFile(__FILE__);
         $this->content = ''; //Erasing the loaded content again because it is senseless
         $this->assertTrue($ret);
     }
 
-    public function testLoadFileFileDoesNotExists() {
-        try { 
-            $this->obj->loadFile((string)time());
+    public function testLoadFileFileDoesNotExists()
+    {
+        try {
+            $this->obj->loadFile((string) time());
 
             $this->fail("Expected an exception with a faux file name");
-        } catch (Structures_BibTex_Exception $sbe) {
+        }
+        catch (Structures_BibTex_Exception $sbe) {
             $this->assertContains("Could not find file", $sbe->getMessage());
         }
 
@@ -61,26 +142,31 @@ class BibTexTest extends PHPUnit_Framework_TestCase
     /**
      * @todo Implement test_parseEntry().
      */
-    public function test_parseEntry() {
+    public function test_parseEntry()
+    {
         //Remember here that there is no closing brace!
-        $test                  = "@foo{bar,john=doe";
-        $shouldbe              = array();
-        $shouldbe['john']      = 'doe';
-        $shouldbe['cite']      = 'bar';
+        $test = "@foo{bar,john=doe";
+        $shouldbe = array();
+        $shouldbe['john'] = 'doe';
+        $shouldbe['cite'] = 'bar';
         $shouldbe['entryType'] = 'foo';
         $this->assertEquals($shouldbe, $this->obj->_parseEntry($test));
     }
 
-    public function test_checkEqualSignTrue() {
+    public function test_checkEqualSignTrue()
+    {
         $test = "={=}";
-        $this->assertTrue($this->obj->_checkEqualSign($test,0));
-    }
-    public function test_checkEqualSignFalse() {
-        $test = "={=}";
-        $this->assertFalse($this->obj->_checkEqualSign($test,2));
+        $this->assertTrue($this->obj->_checkEqualSign($test, 0));
     }
 
-    public function testClearWarnings() {
+    public function test_checkEqualSignFalse()
+    {
+        $test = "={=}";
+        $this->assertFalse($this->obj->_checkEqualSign($test, 2));
+    }
+
+    public function testClearWarnings()
+    {
         $this->obj->clearWarnings();
         $this->obj->_generateWarning('type', 'entry');
         $this->obj->clearWarnings();
@@ -91,34 +177,42 @@ class BibTexTest extends PHPUnit_Framework_TestCase
      * the next tests check for the generation of the following Warnings:
      * - WARNING_AT_IN_BRACES
      * - WARNING_ESCAPED_DOUBLE_QUOTE_INSIDE_DOUBLE_QUOTES
-     * - WARNING_UNBALANCED_AMOUNT_OF_BRACES
+     * - WARNING_UNBALANCED_NUMBER_OF_BRACES
      */
-    public function test_validateValueWarningAtInBraces() {
+    public function test_validateValueWarningAtInBraces()
+    {
         $this->obj->clearWarnings();
         $test = '{john@doe}';
         $this->obj->_validateValue($test, '');
         $this->assertEquals('WARNING_AT_IN_BRACES', $this->obj->warnings[0]['warning']);
     }
-    public function test_validateValueWarningEscapedDoubleQuoteInsideDoubleQuotes() {
+
+    public function test_validateValueWarningEscapedDoubleQuoteInsideDoubleQuotes()
+    {
         $this->obj->clearWarnings();
         $test = '"john\"doe"';
         $this->obj->_validateValue($test, '');
         $this->assertEquals('WARNING_ESCAPED_DOUBLE_QUOTE_INSIDE_DOUBLE_QUOTES', $this->obj->warnings[0]['warning']);
     }
-    public function test_validateValueWarningUnbalancedAmountOfBracesOpen() {
+
+    public function test_validateValueWarningUnbalancedNumberOfBracesOpen()
+    {
         $this->obj->clearWarnings();
         $test = '{john{doe}';
         $this->obj->_validateValue($test, '');
-        $this->assertEquals('WARNING_UNBALANCED_AMOUNT_OF_BRACES', $this->obj->warnings[0]['warning']);
+        $this->assertEquals('WARNING_UNBALANCED_NUMBER_OF_BRACES', $this->obj->warnings[0]['warning']);
     }
-    public function test_validateValueWarningUnbalancedAmountOfBracesClosed() {
+
+    public function test_validateValueWarningUnbalancedNumberOfBracesClosed()
+    {
         $this->obj->clearWarnings();
         $test = '{john}doe}';
         $this->obj->_validateValue($test, '');
-        $this->assertEquals('WARNING_UNBALANCED_AMOUNT_OF_BRACES', $this->obj->warnings[0]['warning']);
+        $this->assertEquals('WARNING_UNBALANCED_NUMBER_OF_BRACES', $this->obj->warnings[0]['warning']);
     }
 
-    public function test_generateWarning() {
+    public function test_generateWarning()
+    {
         $this->obj->clearWarnings();
         $this->obj->_generateWarning('type', 'entry');
         $ret = $this->obj->hasWarning();
@@ -132,12 +226,12 @@ class BibTexTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($this->obj->hasWarning());
     }
 
-    public function testAmount()
+    public function testCount()
     {
         $teststring = "@Article {art1,author = {John Doe and Jane Doe}}@Article { art2,author = {John Doe and Jane Doe}}";
         $this->obj->content = $teststring;
         $this->obj->parse();
-        $this->assertEquals(2, $this->obj->amount());
+        $this->assertEquals(2, $this->obj->count());
     }
 
     public function testGetStatistic()
@@ -145,19 +239,19 @@ class BibTexTest extends PHPUnit_Framework_TestCase
         $teststring = "@Article {art1,author = {John Doe and Jane Doe}}@Article { art2,author = {John Doe and Jane Doe}}";
         $this->obj->content = $teststring;
         $this->obj->parse();
-        $shouldbe            = array();
+        $shouldbe = array();
         $shouldbe['article'] = 2;
         $this->assertEquals($shouldbe, $this->obj->getStatistic());
     }
 
     function testSingleParse()
     {
-        $teststring="@Article { ppm_jon:1991,
+        $teststring = "@Article { ppm_jon:1991,
 author = {John Doe and Jane Doe}
 }";
-        $this->obj->content=$teststring;
+        $this->obj->content = $teststring;
         $this->obj->parse();
-        $this->assertEquals(1,$this->obj->amount());
+        $this->assertEquals(1, $this->obj->count());
     }
 
     function testMultiParse()
@@ -170,7 +264,7 @@ author = {John Doe and Jane Doe}
 }";
         $this->obj->content = $teststring;
         $this->obj->parse();
-        $this->assertEquals(2,$this->obj->amount());
+        $this->assertEquals(2, $this->obj->count());
     }
 
     function testParse()
@@ -181,38 +275,38 @@ author = {John Doe and Jane Doe}
 }";
         $shouldbe = array();
         $shouldbe[0]['entryType'] = 'article';
-        $shouldbe[0]['cite']      = 'art1';
-        $shouldbe[0]['title']     = 'Titel1';
+        $shouldbe[0]['cite'] = 'art1';
+        $shouldbe[0]['title'] = 'Titel1';
         $shouldbe[0]['author'][0]['first'] = 'John';
-        $shouldbe[0]['author'][0]['von']   = '';
-        $shouldbe[0]['author'][0]['last']  = 'Doe';
-        $shouldbe[0]['author'][0]['jr']    = '';
+        $shouldbe[0]['author'][0]['von'] = '';
+        $shouldbe[0]['author'][0]['last'] = 'Doe';
+        $shouldbe[0]['author'][0]['jr'] = '';
         $shouldbe[0]['author'][1]['first'] = 'Jane';
-        $shouldbe[0]['author'][1]['von']   = '';
-        $shouldbe[0]['author'][1]['last']  = 'Doe';
-        $shouldbe[0]['author'][1]['jr']    = '';
+        $shouldbe[0]['author'][1]['von'] = '';
+        $shouldbe[0]['author'][1]['last'] = 'Doe';
+        $shouldbe[0]['author'][1]['jr'] = '';
         $this->obj->content = $teststring;
         $this->obj->parse();
-        $this->assertEquals($shouldbe,$this->obj->data);
+        $this->assertEquals($shouldbe, $this->obj->data);
     }
 
     function testBibTex()
     {
         $testarray = array();
         $testarray[0]['entryType'] = 'Article';
-        $testarray[0]['cite']      = 'art1';
-        $testarray[0]['title']     = 'Titel1';
+        $testarray[0]['cite'] = 'art1';
+        $testarray[0]['title'] = 'Titel1';
         $testarray[0]['author'][0]['first'] = 'John';
-        $testarray[0]['author'][0]['von']   = '';
-        $testarray[0]['author'][0]['last']  = 'Doe';
-        $testarray[0]['author'][0]['jr']    = '';
+        $testarray[0]['author'][0]['von'] = '';
+        $testarray[0]['author'][0]['last'] = 'Doe';
+        $testarray[0]['author'][0]['jr'] = '';
         $testarray[0]['author'][1]['first'] = 'Jane';
-        $testarray[0]['author'][1]['von']   = '';
-        $testarray[0]['author'][1]['last']  = 'Doe';
-        $testarray[0]['author'][1]['jr']    = '';
+        $testarray[0]['author'][1]['von'] = '';
+        $testarray[0]['author'][1]['last'] = 'Doe';
+        $testarray[0]['author'][1]['jr'] = '';
         $shouldbe = "@article { art1,\n\ttitle = {Titel1},\n\tauthor = {Doe, , John and Doe, , Jane}\n}";
         $this->obj->data = $testarray;
-        $this->assertEquals(trim($shouldbe),trim($this->obj->bibTex()));
+        $this->assertEquals(trim($shouldbe), trim($this->obj->bibTex()));
     }
 
     function testAddEntry()
@@ -230,7 +324,7 @@ author = {John Doe and Jane Doe}
         $this->obj->content = $teststring;
         $this->obj->parse();
         $this->obj->addEntry($addarray);
-        $this->assertEquals(2,$this->obj->amount());
+        $this->assertEquals(2, $this->obj->count());
     }
 
     function testEntryOverMoreLines()
@@ -247,23 +341,23 @@ author = {John Doe and Jane Doe}
   isbn =         \"0-486-61272-4\"
 }";
         $shouldbe = array();
-        $shouldbe[0]['entryType']  = 'book';
-        $shouldbe[0]['cite']       = 'abramowitz+stegun';
-        $shouldbe[0]['title']      = "Handbook of Mathematical Functions with
+        $shouldbe[0]['entryType'] = 'book';
+        $shouldbe[0]['cite'] = 'abramowitz+stegun';
+        $shouldbe[0]['title'] = "Handbook of Mathematical Functions with
                   Formulas, Graphs, and Mathematical Tables";
         $shouldbe[0]['author'][0]['first'] = 'Milton';
-        $shouldbe[0]['author'][0]['von']   = '';
-        $shouldbe[0]['author'][0]['last']  = 'Abramowitz';
-        $shouldbe[0]['author'][0]['jr']    = '';
+        $shouldbe[0]['author'][0]['von'] = '';
+        $shouldbe[0]['author'][0]['last'] = 'Abramowitz';
+        $shouldbe[0]['author'][0]['jr'] = '';
         $shouldbe[0]['author'][1]['first'] = 'Irene A.';
-        $shouldbe[0]['author'][1]['von']   = '';
-        $shouldbe[0]['author'][1]['last']  = 'Stegun';
-        $shouldbe[0]['author'][1]['jr']    = '';
+        $shouldbe[0]['author'][1]['von'] = '';
+        $shouldbe[0]['author'][1]['last'] = 'Stegun';
+        $shouldbe[0]['author'][1]['jr'] = '';
         $shouldbe[0]['publisher'] = 'Dover';
-        $shouldbe[0]['year']      = '1964';
-        $shouldbe[0]['address']   = 'New York';
-        $shouldbe[0]['edition']   = 'ninth Dover printing, tenth GPO printing';
-        $shouldbe[0]['isbn']      = '0-486-61272-4';
+        $shouldbe[0]['year'] = '1964';
+        $shouldbe[0]['address'] = 'New York';
+        $shouldbe[0]['edition'] = 'ninth Dover printing, tenth GPO printing';
+        $shouldbe[0]['isbn'] = '0-486-61272-4';
         $this->obj->content = $teststring;
         $this->obj->parse();
         $this->assertEquals($shouldbe, $this->obj->data);
@@ -282,31 +376,32 @@ author = {John Doe and Jane Doe}
 }";
         $shouldbe = array();
         $shouldbe[0]['entryType'] = 'article';
-        $shouldbe[0]['cite']      = 'art1';
-        $shouldbe[0]['title']     = 'Titel1';
+        $shouldbe[0]['cite'] = 'art1';
+        $shouldbe[0]['title'] = 'Titel1';
         $shouldbe[0]['author'][0]['first'] = 'John';
-        $shouldbe[0]['author'][0]['von']   = '';
-        $shouldbe[0]['author'][0]['last']  = 'Doe';
-        $shouldbe[0]['author'][0]['jr']    = '';
+        $shouldbe[0]['author'][0]['von'] = '';
+        $shouldbe[0]['author'][0]['last'] = 'Doe';
+        $shouldbe[0]['author'][0]['jr'] = '';
         $shouldbe[0]['author'][1]['first'] = 'Jane';
-        $shouldbe[0]['author'][1]['von']   = '';
-        $shouldbe[0]['author'][1]['last']  = 'Doe';
-        $shouldbe[0]['author'][1]['jr']    = '';
+        $shouldbe[0]['author'][1]['von'] = '';
+        $shouldbe[0]['author'][1]['last'] = 'Doe';
+        $shouldbe[0]['author'][1]['jr'] = '';
         $shouldbe[1]['entryType'] = 'article';
-        $shouldbe[1]['cite']      = 'art2';
-        $shouldbe[1]['title']     = 'Titel2';
+        $shouldbe[1]['cite'] = 'art2';
+        $shouldbe[1]['title'] = 'Titel2';
         $shouldbe[1]['author'][0]['first'] = 'John';
-        $shouldbe[1]['author'][0]['von']   = '';
-        $shouldbe[1]['author'][0]['last']  = 'Doe';
-        $shouldbe[1]['author'][0]['jr']    = '';
+        $shouldbe[1]['author'][0]['von'] = '';
+        $shouldbe[1]['author'][0]['last'] = 'Doe';
+        $shouldbe[1]['author'][0]['jr'] = '';
         $shouldbe[1]['author'][1]['first'] = 'Jane';
-        $shouldbe[1]['author'][1]['von']   = '';
-        $shouldbe[1]['author'][1]['last']  = 'Doe';
-        $shouldbe[1]['author'][1]['jr']    = '';
+        $shouldbe[1]['author'][1]['von'] = '';
+        $shouldbe[1]['author'][1]['last'] = 'Doe';
+        $shouldbe[1]['author'][1]['jr'] = '';
         $this->obj->content = $teststring;
         $this->obj->parse();
         $this->assertEquals($shouldbe, $this->obj->data);
     }
+
     /*
 	 function testWrongBraces1() {
 	 $teststring = "@Article { art1,
@@ -326,7 +421,8 @@ author = {John Doe and Jane Doe}
 	 $this->assertTrue(PEAR::isError($this->obj->parse()));
 	 }
     */
-    function testWrongBraces3() {
+    function testWrongBraces3()
+    {
         $teststring = "@Article { art1,
 title = {Titel1},
 author = {John {Doe and {Jane Doe}
@@ -336,41 +432,47 @@ author = {John {Doe and {Jane Doe}
             $this->obj->parse();
 
             $this->fail("Expected an exception");
-        } catch (Structures_BibTex_Exception $sbe) {
+        }
+        catch (Structures_BibTex_Exception $sbe) {
             $this->assertContains("Unbalanced parenthesis", $sbe->getMessage());
         }
     }
 
-    function testWarningAtInBraces() {
+    function testWarningAtInBraces()
+    {
         $teststring = "@Article { art1,
 title = {Titel1},
 author = {John Doe and @Jane Doe}
 }";
         $this->obj->content = $teststring;
         $this->obj->parse();
-        $this->assertTrue('WARNING_AT_IN_BRACES'==$this->obj->warnings[0]['warning']);
+        $this->assertTrue('WARNING_AT_IN_BRACES' == $this->obj->warnings[0]['warning']);
     }
-    function testWarningEscapedDoubleQuote() {
+
+    function testWarningEscapedDoubleQuote()
+    {
         $teststring = "@Article { art1,
 title = {Titel1},
 author = \"John Doe and \\\"Jane Doe\"
 }";
         $this->obj->content = $teststring;
         $this->obj->parse();
-        $this->assertTrue('WARNING_ESCAPED_DOUBLE_QUOTE_INSIDE_DOUBLE_QUOTES'==$this->obj->warnings[0]['warning']);
+        $this->assertTrue('WARNING_ESCAPED_DOUBLE_QUOTE_INSIDE_DOUBLE_QUOTES' == $this->obj->warnings[0]['warning']);
     }
+
     /*
-	 function testWarningAmountBraces() {
+	 function testWarningCountBraces() {
 	 $teststring = "@Article { art1,
 	 title = {Tit{el1},
 	 author = {John Doe and }Jane Doe}
 	 }";
 	 $this->obj->content = $teststring;
 	 $this->obj->parse();
-	 $this->assertTrue('WARNING_UNBALANCED_AMOUNT_OF_BRACES'==$this->obj->warnings[0]['warning']);
+	 $this->assertTrue('WARNING_UNBALANCED_NUMBER_OF_BRACES'==$this->obj->warnings[0]['warning']);
 	 }
     */
-    function testWarningMultipleEntries() {
+    function testWarningMultipleEntries()
+    {
         $teststring = "@Article { art1,
 title = {Titel1},
 author = {John Doe and Jane Doe}
@@ -393,7 +495,7 @@ author = {John Doe and Jane Doe}
 }";
         $this->obj->content = $teststring;
         $this->obj->parse();
-        $this->assertTrue('WARNING_MULTIPLE_ENTRIES'==$this->obj->warnings[0]['warning']);
+        $this->assertTrue('WARNING_MULTIPLE_ENTRIES' == $this->obj->warnings[0]['warning']);
     }
 
     /* This testing suite is needed to get the Authors correct.
@@ -404,305 +506,378 @@ author = {John Doe and Jane Doe}
      "First": There are three different ways writing an author this is the first one
      "Simple": Description of the tes
     */
-    function testAuthorFirstSimple() {
-        $test     = "AA BB";
+    function testAuthorFirstSimple()
+    {
+        $test = "AA BB";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA';
-        $shouldbe[0]['von']   = '';
-        $shouldbe[0]['last']  = 'BB';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = '';
+        $shouldbe[0]['last'] = 'BB';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    
-    function testAuthorFirstLastCannotBeEmpty() {
-        $test     = "AA";
+
+    function testAuthorFirstLastCannotBeEmpty()
+    {
+        $test = "AA";
         $shouldbe = array();
         $shouldbe[0]['first'] = '';
-        $shouldbe[0]['von']   = '';
-        $shouldbe[0]['last']  = 'AA';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = '';
+        $shouldbe[0]['last'] = 'AA';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    
-    function testAuthorFirstSimpleLowerCase() {
-        $test     = "AA bb";
+
+    function testAuthorFirstSimpleLowerCase()
+    {
+        $test = "AA bb";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA';
-        $shouldbe[0]['von']   = '';
-        $shouldbe[0]['last']  = 'bb';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = '';
+        $shouldbe[0]['last'] = 'bb';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    
-    function testAuthorFirstLastCannotBeEmptyLowerCase() {
-        $test     = "aa";
+
+    function testAuthorFirstLastCannotBeEmptyLowerCase()
+    {
+        $test = "aa";
         $shouldbe = array();
         $shouldbe[0]['first'] = '';
-        $shouldbe[0]['von']   = '';
-        $shouldbe[0]['last']  = 'aa';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = '';
+        $shouldbe[0]['last'] = 'aa';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    
-    function testAuthorFirstSimpleVon() {
-        $test     = "AA bb CC";
+
+    function testAuthorFirstSimpleVon()
+    {
+        $test = "AA bb CC";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA';
-        $shouldbe[0]['von']   = 'bb';
-        $shouldbe[0]['last']  = 'CC';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = 'bb';
+        $shouldbe[0]['last'] = 'CC';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    function testAuthorFirstSimpleVonInnerUppercase() {
-        $test     = "AA bb CC dd EE";
+
+    function testAuthorFirstSimpleVonInnerUppercase()
+    {
+        $test = "AA bb CC dd EE";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA';
-        $shouldbe[0]['von']   = 'bb CC dd';
-        $shouldbe[0]['last']  = 'EE';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = 'bb CC dd';
+        $shouldbe[0]['last'] = 'EE';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    function testAuthorFirstDigitsArecaselessUppercase() {
-        $test     = "AA 1B cc dd";
+
+    function testAuthorFirstDigitsArecaselessUppercase()
+    {
+        $test = "AA 1B cc dd";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA 1B';
-        $shouldbe[0]['von']   = 'cc';
-        $shouldbe[0]['last']  = 'dd';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = 'cc';
+        $shouldbe[0]['last'] = 'dd';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    function testAuthorFirstDigitsArecaselessLowercase() {
-        $test     = "AA 1b cc dd";
+
+    function testAuthorFirstDigitsArecaselessLowercase()
+    {
+        $test = "AA 1b cc dd";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA';
-        $shouldbe[0]['von']   = '1b cc';
-        $shouldbe[0]['last']  = 'dd';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = '1b cc';
+        $shouldbe[0]['last'] = 'dd';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    function testAuthorFirstPseudoLettersAreCaselessLowerInsideUpperOutside() {
-        $test     = "AA {b}B cc dd";
+
+    function testAuthorFirstPseudoLettersAreCaselessLowerInsideUpperOutside()
+    {
+        $test = "AA {b}B cc dd";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA {b}B';
-        $shouldbe[0]['von']   = 'cc';
-        $shouldbe[0]['last']  = 'dd';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = 'cc';
+        $shouldbe[0]['last'] = 'dd';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    function testAuthorFirstPseudoLettersAreCaselessLowerInsideLowerOutside() {
-        $test     = "AA {b}b cc dd";
+
+    function testAuthorFirstPseudoLettersAreCaselessLowerInsideLowerOutside()
+    {
+        $test = "AA {b}b cc dd";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA';
-        $shouldbe[0]['von']   = '{b}b cc';
-        $shouldbe[0]['last']  = 'dd';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = '{b}b cc';
+        $shouldbe[0]['last'] = 'dd';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    function testAuthorFirstPseudoLettersAreCaselessUpperInsideUpperOutside() {
-        $test     = "AA {B}B cc dd";
+
+    function testAuthorFirstPseudoLettersAreCaselessUpperInsideUpperOutside()
+    {
+        $test = "AA {B}B cc dd";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA {B}B';
-        $shouldbe[0]['von']   = 'cc';
-        $shouldbe[0]['last']  = 'dd';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = 'cc';
+        $shouldbe[0]['last'] = 'dd';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    function testAuthorFirstPseudoLettersAreCaselessUpperInsideLowerOutside() {
-        $test     = "AA {B}b cc dd";
+
+    function testAuthorFirstPseudoLettersAreCaselessUpperInsideLowerOutside()
+    {
+        $test = "AA {B}b cc dd";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA';
-        $shouldbe[0]['von']   = '{B}b cc';
-        $shouldbe[0]['last']  = 'dd';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = '{B}b cc';
+        $shouldbe[0]['last'] = 'dd';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    function testAuthorFirstNonLettersAreCaselessUpperCase() {
-        $test     = "AA \BB{b} cc dd";
+
+    function testAuthorFirstNonLettersAreCaselessUpperCase()
+    {
+        $test = "AA \BB{b} cc dd";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA \BB{b}';
-        $shouldbe[0]['von']   = 'cc';
-        $shouldbe[0]['last']  = 'dd';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = 'cc';
+        $shouldbe[0]['last'] = 'dd';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    function testAuthorFirstNonLettersAreCaselessLowerCase() {
-        $test     = "AA \bb{b} cc dd";
+
+    function testAuthorFirstNonLettersAreCaselessLowerCase()
+    {
+        $test = "AA \bb{b} cc dd";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA';
-        $shouldbe[0]['von']   = '\bb{b} cc';
-        $shouldbe[0]['last']  = 'dd';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = '\bb{b} cc';
+        $shouldbe[0]['last'] = 'dd';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    function testAuthorFirstGroupingCaselessOne() {
-        $test     = "AA {bb} cc DD";
+
+    function testAuthorFirstGroupingCaselessOne()
+    {
+        $test = "AA {bb} cc DD";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA {bb}';
-        $shouldbe[0]['von']   = 'cc';
-        $shouldbe[0]['last']  = 'DD';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = 'cc';
+        $shouldbe[0]['last'] = 'DD';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    function testAuthorFirstGroupingCaselessTwo() {
-        $test     = "AA bb {cc} DD";
+
+    function testAuthorFirstGroupingCaselessTwo()
+    {
+        $test = "AA bb {cc} DD";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA';
-        $shouldbe[0]['von']   = 'bb';
-        $shouldbe[0]['last']  = '{cc} DD';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = 'bb';
+        $shouldbe[0]['last'] = '{cc} DD';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    function testAuthorFirstGroupingCaselessThree() {
-        $test     = "AA {bb} CC";
+
+    function testAuthorFirstGroupingCaselessThree()
+    {
+        $test = "AA {bb} CC";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA {bb}';
-        $shouldbe[0]['von']   = '';
-        $shouldbe[0]['last']  = 'CC';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = '';
+        $shouldbe[0]['last'] = 'CC';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    function testAuthorSecondAndThirdSimpleCaseFirstUppercase() {
-        $test     = "bb CC, AA";
+
+    function testAuthorSecondAndThirdSimpleCaseFirstUppercase()
+    {
+        $test = "bb CC, AA";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA';
-        $shouldbe[0]['von']   = 'bb';
-        $shouldbe[0]['last']  = 'CC';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = 'bb';
+        $shouldbe[0]['last'] = 'CC';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    function testAuthorSecondAndThirdSimpleCaseFirstLowercase() {
-        $test     = "bb CC, aa";
+
+    function testAuthorSecondAndThirdSimpleCaseFirstLowercase()
+    {
+        $test = "bb CC, aa";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'aa';
-        $shouldbe[0]['von']   = 'bb';
-        $shouldbe[0]['last']  = 'CC';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = 'bb';
+        $shouldbe[0]['last'] = 'CC';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    function testAuthorSecondAndThirdSimpleVon() {
-        $test     = "bb CC dd EE, AA";
+
+    function testAuthorSecondAndThirdSimpleVon()
+    {
+        $test = "bb CC dd EE, AA";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA';
-        $shouldbe[0]['von']   = 'bb CC dd';
-        $shouldbe[0]['last']  = 'EE';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = 'bb CC dd';
+        $shouldbe[0]['last'] = 'EE';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    function testAuthorSecondAndThirdLastPartCoannotBeEmpty() {
-        $test     = "bb, AA";
+
+    function testAuthorSecondAndThirdLastPartCoannotBeEmpty()
+    {
+        $test = "bb, AA";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA';
-        $shouldbe[0]['von']   = '';
-        $shouldbe[0]['last']  = 'bb';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = '';
+        $shouldbe[0]['last'] = 'bb';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    function testAuthorSecondAndThirdFirstCanBeEmptyAfterComma() {
-        $test     = "BB,";
+
+    function testAuthorSecondAndThirdFirstCanBeEmptyAfterComma()
+    {
+        $test = "BB,";
         $shouldbe = array();
         $shouldbe[0]['first'] = '';
-        $shouldbe[0]['von']   = '';
-        $shouldbe[0]['last']  = 'BB';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = '';
+        $shouldbe[0]['last'] = 'BB';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    function testAuthorSecondAndThirdSimpleJrUppercase() {
-        $test     = "bb CC,XX, AA";
+
+    function testAuthorSecondAndThirdSimpleJrUppercase()
+    {
+        $test = "bb CC,XX, AA";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA';
-        $shouldbe[0]['von']   = 'bb';
-        $shouldbe[0]['last']  = 'CC';
-        $shouldbe[0]['jr']    = 'XX';
+        $shouldbe[0]['von'] = 'bb';
+        $shouldbe[0]['last'] = 'CC';
+        $shouldbe[0]['jr'] = 'XX';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    function testAuthorSecondAndThirdSimpleJrLowercase() {
-        $test     = "bb CC,xx, AA";
+
+    function testAuthorSecondAndThirdSimpleJrLowercase()
+    {
+        $test = "bb CC,xx, AA";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA';
-        $shouldbe[0]['von']   = 'bb';
-        $shouldbe[0]['last']  = 'CC';
-        $shouldbe[0]['jr']    = 'xx';
+        $shouldbe[0]['von'] = 'bb';
+        $shouldbe[0]['last'] = 'CC';
+        $shouldbe[0]['jr'] = 'xx';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    function testAuthorSecondAndThirdJrCanBeEmptyBetweenCommas() {
-        $test     = "BB,, AA";
+
+    function testAuthorSecondAndThirdJrCanBeEmptyBetweenCommas()
+    {
+        $test = "BB,, AA";
         $shouldbe = array();
         $shouldbe[0]['first'] = 'AA';
-        $shouldbe[0]['von']   = '';
-        $shouldbe[0]['last']  = 'BB';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = '';
+        $shouldbe[0]['last'] = 'BB';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
+
     /*Testing the case determination needed for the authors*/
-    function testCaseUpperSimple() {
+    function testCaseUpperSimple()
+    {
         $test = 'AA';
         $this->assertEquals(1, $this->obj->_determineCase($test));
     }
-    function testCaseLowerSimple() {
+
+    function testCaseLowerSimple()
+    {
         $test = 'aa';
         $this->assertEquals(0, $this->obj->_determineCase($test));
     }
-    function testCaseCaselessSimple() {
+
+    function testCaseCaselessSimple()
+    {
         $test = '{a}';
         $this->assertEquals(-1, $this->obj->_determineCase($test));
     }
-    function testCaseUpperComplexBrace() {
+
+    function testCaseUpperComplexBrace()
+    {
         $test = '{A}A';
         $this->assertEquals(1, $this->obj->_determineCase($test));
     }
-    function testCaseLowerComplexBrace() {
+
+    function testCaseLowerComplexBrace()
+    {
         $test = '{a}a';
         $this->assertEquals(0, $this->obj->_determineCase($test));
     }
-    function testCaseUpperComplexNumber() {
+
+    function testCaseUpperComplexNumber()
+    {
         $test = '1A';
         $this->assertEquals(1, $this->obj->_determineCase($test));
     }
-    function testCaseLowerComplexNumber() {
+
+    function testCaseLowerComplexNumber()
+    {
         $test = '1a';
         $this->assertEquals(0, $this->obj->_determineCase($test));
     }
-    function testCaseUpperComplexWhitespace() {
+
+    function testCaseUpperComplexWhitespace()
+    {
         $test = ' A';
         $this->assertEquals(1, $this->obj->_determineCase($test));
     }
-    function testCaseLowerComplexWhitespace() {
+
+    function testCaseLowerComplexWhitespace()
+    {
         $test = ' a';
         $this->assertEquals(0, $this->obj->_determineCase($test));
     }
-    function testCaseErrorEmptyString() {
+
+    function testCaseErrorEmptyString()
+    {
         $test = '';
         try {
             $this->obj->_determineCase($test);
 
             $this->fail("Expected an exception");
-        } catch (Structures_BibTex_Exception $sbe) {
+        }
+        catch (Structures_BibTex_Exception $sbe) {
             $this->assertContains("Could not determine case on word", $sbe->getMessage());
         }
 
     }
-    function testCaseErrorNonString() {
+
+    function testCaseErrorNonString()
+    {
         $test = 2;
         try {
             $this->obj->_determineCase($test);
 
             $this->fail("Expected an exception");
-        } catch (Structures_BibTex_Exception $sbe) {
+        }
+        catch (Structures_BibTex_Exception $sbe) {
             $this->assertContains("Could not determine case on word", $sbe->getMessage());
         }
 
     }
-    
-    function testAllowedTypeTrue() {
+
+    function testAllowedTypeTrue()
+    {
         $test = 'article';
         $this->assertTrue($this->obj->_checkAllowedEntryType($test));
     }
-    function testAllowedTypeFalse() {
+
+    function testAllowedTypeFalse()
+    {
         $test = 'foo';
         $this->assertFalse($this->obj->_checkAllowedEntryType($test));
     }
-    
-    public function testAllowedTypeWarning() {
+
+    public function testAllowedTypeWarning()
+    {
         $this->obj->clearWarnings();
         $test = "@Foo { art1,
 title = {Titel1},
@@ -713,8 +888,9 @@ author = {John Doe and Jane Doe}
         $this->obj->parse();
         $this->assertEquals('WARNING_NOT_ALLOWED_ENTRY_TYPE', $this->obj->warnings[0]['warning']);
     }
-    
-    public function testMissingLastBraceParsing() {
+
+    public function testMissingLastBraceParsing()
+    {
         $this->obj->clearWarnings();
         $test = '
 @phdthesis{foo1,
@@ -745,10 +921,11 @@ year = {year4}
         $this->obj->content = $test;
         $this->obj->setOption('validate', true);
         $this->obj->parse();
-        $this->assertEquals($this->obj->amount(), 4);
+        $this->assertEquals($this->obj->count(), 4);
     }
 
-    public function testMissingLastBraceParsing2() {
+    public function testMissingLastBraceParsing2()
+    {
         $this->obj->clearWarnings();
         $test = '
 @phdthesis{foo1,
@@ -760,10 +937,11 @@ year = {year1}
         $this->obj->content = $test;
         $this->obj->setOption('validate', true);
         $this->obj->parse();
-        $this->assertEquals($this->obj->amount(), 1);
+        $this->assertEquals($this->obj->count(), 1);
     }
-    
-    public function testMissingLastBraceWarning() {
+
+    public function testMissingLastBraceWarning()
+    {
         $this->obj->clearWarnings();
         $test = '
 @phdthesis{foo1,
@@ -797,7 +975,8 @@ year = {year4}
         $this->assertEquals($this->obj->warnings[0]['warning'], 'WARNING_MISSING_END_BRACE');
     }
 
-    public function testNewlineInAuthorField() {
+    public function testNewlineInAuthorField()
+    {
         $this->obj->clearWarnings();
         $test = '
 @phdthesis{foo1,
@@ -808,14 +987,28 @@ author2},
 year = {year1}
 }
         ';
-        $shouldbe = array(array('first'=>'','von'=>'','last'=>'author1','jr'=>''), array('first'=>'','von'=>'','last'=>'author2','jr'=>''));
+        $shouldbe = array(
+            array(
+                'first' => '',
+                'von' => '',
+                'last' => 'author1',
+                'jr' => ''
+            ),
+            array(
+                'first' => '',
+                'von' => '',
+                'last' => 'author2',
+                'jr' => ''
+            )
+        );
         $this->obj->content = $test;
         $this->obj->setOption('unwrap', false);
         $this->obj->parse();
         $this->assertEquals($shouldbe, $this->obj->data[0]['author']);
     }
 
-    public function testNotRemoveCurlyBraces() {
+    public function testNotRemoveCurlyBraces()
+    {
         $this->obj->clearWarnings();
         $test = '
 @phdthesis{foo4,
@@ -832,8 +1025,9 @@ year = {year4}
         //print_r($this->obj->data[0]['author']);
         $this->assertEquals($shouldbe, $this->obj->data[0]['title']);
     }
-    
-    public function testRemoveCurlyBraces() {
+
+    public function testRemoveCurlyBraces()
+    {
         $this->obj->clearWarnings();
         $test = '
 @phdthesis{foo4,
@@ -851,7 +1045,8 @@ year = {year4}
         $this->assertEquals($shouldbe, $this->obj->data[0]['title']);
     }
 
-    public function testRemoveCurlyBraces2() {
+    public function testRemoveCurlyBraces2()
+    {
         $this->obj->clearWarnings();
         $test = '
 @phdthesis{foo4,
@@ -868,7 +1063,8 @@ year = {year4}
         $this->assertEquals($shouldbe, $this->obj->data[0]['title']);
     }
 
-    public function testRemoveCurlyBracesWithoutBraces() {
+    public function testRemoveCurlyBracesWithoutBraces()
+    {
         $this->obj->clearWarnings();
         $test = '
 @phdthesis{foo4,
@@ -884,8 +1080,9 @@ year = {year4}
         $this->obj->parse();
         $this->assertEquals($shouldbe, $this->obj->data[0]['title']);
     }
-    
-    public function testRtfExport() {
+
+    public function testRtfExport()
+    {
         $test = '
 @phdthesis{foo4,
 title = {title},
@@ -898,23 +1095,24 @@ year = {year}
 author title journal year
 \par
 }';
-        $this->obj->content      = $test;
+        $this->obj->content = $test;
         /*Setting formating option and saving old state*/
-        $oldrtfstring            = $this->obj->rtfstring;
-        $this->obj->rtfstring    = 'AUTHORS TITLE JOURNAL YEAR';
-        $oldauthorstring         = $this->obj->authorstring;
+        $oldrtfstring = $this->obj->rtfstring;
+        $this->obj->rtfstring = 'AUTHORS TITLE JOURNAL YEAR';
+        $oldauthorstring = $this->obj->authorstring;
         $this->obj->authorstring = 'LAST';
         $this->obj->parse();
-        
+
         $rtf = $this->obj->rtf();
         /*Resetting old state*/
-        $this->obj->rtfstring    = $oldrtfstring;
+        $this->obj->rtfstring = $oldrtfstring;
         $this->obj->authorstring = $oldauthorstring;
-        
+
         $this->assertEquals($shouldbe, $rtf);
     }
 
-    public function testHtmlExport() {
+    public function testHtmlExport()
+    {
         $test = '
 @phdthesis{foo4,
 title = {title},
@@ -927,68 +1125,72 @@ year = {year}
 author title journal year
 </p>
 ';
-        $this->obj->content      = $test;
+        $this->obj->content = $test;
         /*Setting formating option and saving old state*/
-        $oldhtmlstring           = $this->obj->htmlstring;
-        $this->obj->htmlstring   = 'AUTHORS TITLE JOURNAL YEAR';
-        $oldauthorstring         = $this->obj->authorstring;
+        $oldhtmlstring = $this->obj->htmlstring;
+        $this->obj->htmlstring = 'AUTHORS TITLE JOURNAL YEAR';
+        $oldauthorstring = $this->obj->authorstring;
         $this->obj->authorstring = 'LAST';
         $this->obj->parse();
-        
+
         $html = $this->obj->html();
         /*Resetting old state*/
-        $this->obj->htmlstring   = $oldhtmlstring;
+        $this->obj->htmlstring = $oldhtmlstring;
         $this->obj->authorstring = $oldauthorstring;
-        
+
         $this->assertEquals($shouldbe, $html);
     }
 
-    public function testFormatAuthor() {
+    public function testFormatAuthor()
+    {
         $test = '
 @phdthesis{foo4,
 author = {von Last, Jr ,First}
 }
         ';
         $shouldbe = 'von Last Jr First';
-        $this->obj->content      = $test;
+        $this->obj->content = $test;
         /*Setting formating option and saving old state*/
-        $oldhtmlstring           = $this->obj->htmlstring;
-        $this->obj->htmlstring   = 'AUTHORS';
-        $oldauthorstring         = $this->obj->authorstring;
+        $oldhtmlstring = $this->obj->htmlstring;
+        $this->obj->htmlstring = 'AUTHORS';
+        $oldauthorstring = $this->obj->authorstring;
         $this->obj->authorstring = 'VON LAST JR FIRST';
         $this->obj->parse();
-        
+
         $html = $this->obj->html();
         /*Dropping tags and trimming*/
         $html = trim(strip_tags($html));
         /*Resetting old state*/
-        $this->obj->htmlstring   = $oldhtmlstring;
+        $this->obj->htmlstring = $oldhtmlstring;
         $this->obj->authorstring = $oldauthorstring;
-        
+
         $this->assertEquals($shouldbe, $html);
     }
-    
-    public function testExtractAuthorWhitespace() {
+
+    public function testExtractAuthorWhitespace()
+    {
         $test = 'John Doe';
         $shouldbe = array();
         $shouldbe[0]['first'] = 'John';
-        $shouldbe[0]['von']   = '';
-        $shouldbe[0]['last']  = 'Doe';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = '';
+        $shouldbe[0]['last'] = 'Doe';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
 
-    public function testExtractAuthorTilde() {
+    public function testExtractAuthorTilde()
+    {
         $test = 'John~Doe';
         $shouldbe = array();
         $shouldbe[0]['first'] = 'John';
-        $shouldbe[0]['von']   = '';
-        $shouldbe[0]['last']  = 'Doe';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = '';
+        $shouldbe[0]['last'] = 'Doe';
+        $shouldbe[0]['jr'] = '';
         $this->assertEquals($shouldbe, $this->obj->_extractAuthors($test));
     }
-    
-    public function testNotExtractAuthors() {
+
+    public function testNotExtractAuthors()
+    {
         $this->obj->clearWarnings();
         $test = '
 @phdthesis{foo4,
@@ -1002,7 +1204,8 @@ author = {John Doe},
         $this->assertEquals($shouldbe, $this->obj->data[0]['author']);
     }
 
-    public function testExtractAuthors() {
+    public function testExtractAuthors()
+    {
         $this->obj->clearWarnings();
         $test = '
 @phdthesis{foo4,
@@ -1011,25 +1214,27 @@ author = {John Doe},
         ';
         $shouldbe = array();
         $shouldbe[0]['first'] = 'John';
-        $shouldbe[0]['von']   = '';
-        $shouldbe[0]['last']  = 'Doe';
-        $shouldbe[0]['jr']    = '';
+        $shouldbe[0]['von'] = '';
+        $shouldbe[0]['last'] = 'Doe';
+        $shouldbe[0]['jr'] = '';
         $this->obj->content = $test;
         $this->obj->setOption('extractAuthors', true);
         $this->obj->parse();
         $this->assertEquals($shouldbe, $this->obj->data[0]['author']);
     }
-    
-    public function testNotExtractAuthorsBibtexExport() {
+
+    public function testNotExtractAuthorsBibtexExport()
+    {
         $this->obj->clearWarnings();
-        $test = "@phdthesis { foo4,\n\tauthor = {John Doe}\n}\n\n";
+        $test = "@phdthesis { foo4,\n\tauthor = {John Doe}\n}\n";
         $this->obj->content = $test;
         $this->obj->setOption('extractAuthors', false);
         $this->obj->parse();
         $this->assertEquals($test, $this->obj->bibTex());
     }
 
-    public function testNotExtractAuthorsRtfExport() {
+    public function testNotExtractAuthorsRtfExport()
+    {
         $this->obj->clearWarnings();
         $test = "@phdthesis { foo4,\n\tauthor = {John Doe}\n}\n\n";
         $shouldbe = '{\rtf
@@ -1042,7 +1247,8 @@ John Doe, "{\b }", {\i },
         $this->assertEquals($shouldbe, $this->obj->rtf());
     }
 
-    public function testNotExtractAuthorsHtmlExport() {
+    public function testNotExtractAuthorsHtmlExport()
+    {
         $this->obj->clearWarnings();
         $test = "@phdthesis { foo4,\n\tauthor = {John Doe}\n}\n\n";
         $shouldbe = '<p>
@@ -1065,7 +1271,7 @@ John Doe, "<strong></strong>", <em></em>, <br />
         $this->obj->content = $teststring;
         $this->obj->parse();
 
-        $this->assertEquals('FoOBaR: A system with StrAnGe capitalization',$this->obj->data[0]['title']);
+        $this->assertEquals('FoOBaR: A system with StrAnGe capitalization', $this->obj->data[0]['title']);
     }
 
 }

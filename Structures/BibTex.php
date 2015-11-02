@@ -514,7 +514,7 @@ class Structures_BibTex
      * @param string $entry The entry to check
      * @return bool true if allowed, false otherwise
      */
-    function _checkAllowedEntryType($entry)
+    protected function _checkAllowedEntryType($entry)
     {
         return in_array($entry, $this->allowedEntryTypes);
     }
@@ -530,7 +530,7 @@ class Structures_BibTex
      * @param string $entry The text of the entry until the at
      * @return bool true if the at is correct, false if the at is likely to begin the next entry.
      */
-    function _checkAt($entry)
+    protected function _checkAt($entry)
     {
         $ret = false;
         $opening = array_keys($this->_delimiters);
@@ -577,7 +577,7 @@ class Structures_BibTex
      * @param string $entry The entry where the Delimiter should be stripped from
      * @return string Stripped entry
      */
-    function _stripDelimiter($entry)
+    protected function _stripDelimiter($entry)
     {
         $beginningdels = array_keys($this->_delimiters);
         $firstchar = substr($entry, 0, 1);
@@ -601,7 +601,7 @@ class Structures_BibTex
      * @param string $entry The entry to unwrap
      * @return string unwrapped entry
      */
-    function _unwrap($entry)
+    protected function _unwrap($entry)
     {
         $entry = preg_replace('/\s+/', ' ', $entry);
         return trim($entry);
@@ -614,7 +614,7 @@ class Structures_BibTex
      * @param string $entry The entry to wrap
      * @return string wrapped entry
      */
-    function _wordwrap($entry)
+    protected function _wordwrap($entry)
     {
         if (('' != $entry) && (is_string($entry))) {
             $entry = wordwrap($entry,
@@ -632,7 +632,7 @@ class Structures_BibTex
      * @param string $entry The entry with the authors
      * @return array the extracted authors
      */
-    function _extractAuthors($entry)
+    protected function _extractAuthors($entry)
     {
         $entry = $this->_unwrap($entry);
         $authorarray = explode(' and ', $entry);
@@ -787,7 +787,7 @@ class Structures_BibTex
      * @return int The Case
      * @throws Structures_BibTex_Exception
      */
-    function _determineCase($word)
+    protected function _determineCase($word)
     {
         $ret = -1;
         $trimmedword = trim($word);
@@ -836,7 +836,7 @@ class Structures_BibTex
      * @param string $wholeentry The whole BibTex Entry which the one line is part of
      * @return void
      */
-    function _validateValue($entry, $wholeentry)
+    protected function _validateValue($entry, $wholeentry)
     {
         // There is no @ allowed if the entry is enclosed by braces.
         if (preg_match('/^{.*@.*}$/', $entry)) {
@@ -860,7 +860,7 @@ class Structures_BibTex
             $lastchar = $char;
         }
         if (0 != $open) {
-            $this->_generateWarning('WARNING_UNBALANCED_number_OF_BRACES', $entry, $wholeentry);
+            $this->_generateWarning('WARNING_UNBALANCED_NUMBER_OF_BRACES', $entry, $wholeentry);
         }
     }
 
@@ -949,9 +949,20 @@ class Structures_BibTex
      * @access public
      * @return int The number of available BibTex entries
      */
-    function number()
+    function count()
     {
         return sizeof($this->data);
+    }
+
+    /**
+     * Returns the number of available BibTex entries
+     *
+     * @access public
+     * @return int The number of available BibTex entries
+     */
+    function amount()
+    {
+        return $this->count();
     }
 
     /**
