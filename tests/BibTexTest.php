@@ -4,12 +4,6 @@ if (!defined("PHPUnit_MAIN_METHOD")) {
     define("PHPUnit_MAIN_METHOD", "BibTexTest::main");
  }
 
-require_once "PHPUnit/Framework/TestCase.php";
-require_once "PHPUnit/Framework/TestSuite.php";
-
-// You may remove the following line when all tests have been implemented.
-require_once "PHPUnit/Framework/IncompleteTestError.php";
-
 require_once "Structures/BibTex.php";
 
 /**
